@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover" />
+    <meta name="description" content="MY CLUSTER — tu gente localizada y protegida en tiempo real. Ubicación en vivo, alertas y rutas compartidas. Privado y sin anuncios." />
+    <meta name="theme-color" content="#D93025" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MY CLUSTER" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>MY CLUSTER</title>
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  <link rel="icon" href="/favicon.ico"/>
+    <style id="sentinel-shell">
+      html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+      body {
+        background-color: #EDEFF2;
+        background-image:
+          radial-gradient(60vw 60vh at 12% -10%, rgba(234,67,53,0.08), transparent 60%),
+          radial-gradient(50vw 50vh at 95% 110%, rgba(95,99,104,0.10), transparent 60%);
+        background-attachment: fixed;
+      }
+      ::selection { background: rgba(234,67,53,0.28); }
+      * { scrollbar-width: thin; scrollbar-color: rgba(136,150,174,0.4) transparent; }
+      *::-webkit-scrollbar { width: 8px; height: 8px; }
+      *::-webkit-scrollbar-thumb { background: rgba(136,150,174,0.35); border-radius: 4px; }
+      *::-webkit-scrollbar-track { background: transparent; }
+      input, textarea { outline: none; }
+      /* Sensación nativa: sin flash gris al tocar, sin rebote de goma, sin zoom de doble toque,
+         sin selección de texto accidental en la UI (los inputs sí seleccionan). */
+      * { -webkit-tap-highlight-color: transparent; }
+      html, body { overscroll-behavior: none; touch-action: manipulation; }
+      body { user-select: none; -webkit-user-select: none; }
+      input, textarea, [contenteditable] { user-select: text; -webkit-user-select: text; }
+      [data-testid="welcome-screen"] { width: 100% !important; height: 100% !important; }
+      @media (min-width: 560px) {
+        body > div {
+          position: fixed !important;
+          top: 0 !important; bottom: 0 !important;
+          left: 50% !important; right: auto !important;
+          transform: translateX(-50%) !important;
+          width: 100% !important; max-width: 440px !important;
+          border-left: 1px solid rgba(148,170,205,0.16);
+          border-right: 1px solid rgba(148,170,205,0.16);
+          box-shadow: 0 0 90px rgba(2,6,14,0.85);
+        }
+      }
+    </style>
+    <style id="sentinel-fonts">
+        @font-face { font-family: "Jakarta"; src: url("/fonts/Jakarta.ttf") format("truetype"); font-weight: normal; font-style: normal; font-display: swap; }
+        @font-face { font-family: "JakartaMedium"; src: url("/fonts/JakartaMedium.ttf") format("truetype"); font-weight: normal; font-style: normal; font-display: swap; }
+        @font-face { font-family: "JakartaSemi"; src: url("/fonts/JakartaSemi.ttf") format("truetype"); font-weight: normal; font-style: normal; font-display: swap; }
+        @font-face { font-family: "JakartaBold"; src: url("/fonts/JakartaBold.ttf") format("truetype"); font-weight: normal; font-style: normal; font-display: swap; }
+        @font-face { font-family: "SpaceMono"; src: url("/fonts/SpaceMono.ttf") format("truetype"); font-weight: normal; font-style: normal; font-display: swap; }
+        @font-face { font-family: "Ionicons"; src: url("/fonts/Ionicons.ttf") format("truetype"); font-weight: normal; font-style: normal; font-display: block; }
+    </style>
+</head>
+
+  <body>
+    <!-- Use static rendering with Expo Router to support running without JavaScript. -->
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <!-- The root element for your Expo app. -->
+    <div id="root"></div>
+  <script src="/_expo/static/js/web/entry-a09c8b7e2eb153c24e1910d73a9d1a8c.js" defer></script>
+</body>
+</html>

@@ -33,6 +33,8 @@ const KEYS = [
   { name: "Key principal", key: "AIzaSyCpLR28oNC9n9MIUSsxF0OEXlMLqXCicns" },
   { name: "Key de respaldo", key: "AIzaSyDVj-1Ci9VwwcCi9kirQK3O00eP8mSAY70" }
 ];
+// Google llama aqui cuando rechaza la key (dominio no autorizado, key invalida, etc.)
+window.gm_authFailure = () => { window.__gmAuthFailed = true; };
 const root = document.getElementById("root");
 const summary = document.getElementById("summary");
 const lines = [];
@@ -75,14 +77,21 @@ async function tryKey(k) {
   if (!ok) { setRow(k.name + "-script", "bad", "no cargó en 20 s"); setRow(k.name + "-api", "bad", "—"); setRow(k.name + "-map", "bad", "—"); log(k.name + ": script NO cargó"); return; }
   setRow(k.name + "-script", "ok", Math.round(performance.now() - t0) + " ms");
 
-  // 2) esperar a que exista window.google.maps (loading=async)
+  // 3) esperar a que la API este completa (importLibrary: con loading=async, google.maps.Map
+  //    tarda en existir; usarlo antes da "Map is not a constructor")
   let found = false;
-  for (let i = 0; i < 150; i++) { if (window.google && window.google.maps) { found = true; break; } await sleep(100); }
-  if (!found) { setRow(k.name + "-api", "bad", "no apareció tras el script"); setRow(k.name + "-map", "bad", "—"); log(k.name + ": API NO disponible tras cargar el script"); return; }
-  setRow(k.name + "-api", "ok", "google.maps lista");
+  for (let i = 0; i < 150; i++) {
+    if (window.google && window.google.maps) {
+      try { await google.maps.importLibrary("maps"); found = true; break; }
+      catch (e) { await sleep(100); }
+    } else await sleep(100);
+  }
+  if (!found) { setRow(k.name + "-api", "bad", "la API no completó su carga"); setRow(k.name + "-map", "bad", "—"); log(k.name + ": API NO completó (importLibrary falló)"); return; }
+  setRow(k.name + "-api", "ok", "google.maps.Map lista");
 
-  // 3) intentar un mapa real y comprobar que llegan azulejos
+  // 4) intentar un mapa real y comprobar que llegan azulejos (o capturar el rechazo de Google)
   try {
+    window.__gmAuthFailed = false;
     const map = new google.maps.Map(box, { center: { lat: 40.4168, lng: -3.7038 }, zoom: 14, disableDefaultUI: true });
     const tiles = await new Promise((resolve) => {
       let painted = 0;
@@ -91,7 +100,8 @@ async function tryKey(k) {
       setTimeout(() => { obs.disconnect(); resolve(painted); }, 8000);
     });
     if (tiles > 3) { setRow(k.name + "-map", "ok", tiles + " azulejos pintados"); log(k.name + ": MAPA FUNCIONA (" + tiles + " azulejos)"); }
-    else { setRow(k.name + "-map", "bad", "sin azulejos (¿key restringida?)"); log(k.name + ": API lista pero SIN azulejos — sospecha de restricción de referrer"); }
+    else if (window.__gmAuthFailed) { setRow(k.name + "-map", "bad", "Google rechazó la key (dominio no autorizado)"); log(k.name + ": Google RECHAZO la key — falta autorizar este dominio en Google Cloud"); }
+    else { setRow(k.name + "-map", "bad", "sin azulejos"); log(k.name + ": API lista pero sin azulejos"); }
   } catch (e) {
     setRow(k.name + "-map", "bad", String(e).slice(0, 60));
     log(k.name + ": error creando el mapa: " + String(e).slice(0, 80));

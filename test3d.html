@@ -1,0 +1,29 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body,#map{margin:0;height:100%}</style></head>
+<body><div id="map"></div><div id="log" style="position:fixed;top:6px;left:6px;background:#fff;padding:4px 8px;font:12px sans-serif;z-index:99;border-radius:6px">init</div>
+<script>
+function setLog(t){document.getElementById('log').textContent=t;}
+function boot(){
+  const map = new google.maps.Map(document.getElementById('map'), {
+    center:{lat:40.42,lng:-3.7}, zoom:18.5, mapTypeId:'hybrid', tilt:45, heading:0,
+    zoomControl:true, rotateControl:true, mapTypeControl:false, fullscreenControl:false,
+    gestureHandling:'greedy', clickableIcons:false
+  });
+  class HtmlMarker extends google.maps.OverlayView{
+    constructor(o){super();this.pos=o.position;this.setMap(o.map);}
+    onAdd(){const el=document.createElement('div');
+      el.style.cssText='position:absolute;transform:translate(-50%,-100%);cursor:pointer;text-align:center';
+      el.innerHTML='<div style="width:46px;height:46px;border-radius:50%;background:#20A9DC;border:3px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;font:700 18px sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.35);margin:0 auto">J</div>'
+        +'<div style="width:2px;height:10px;background:#20A9DC;margin:0 auto"></div>'
+        +'<div style="background:#fff;border-radius:8px;padding:2px 8px;font:600 11px sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.25)">Juan<br><span style="color:#5F6368;font-weight:600;font-size:9px">Gran Vía</span></div>';
+      this.el=el;this.getPanes().overlayMouseTarget.appendChild(el);this.draw();}
+    draw(){if(!this.el)return;const p=this.getProjection();if(!p)return;const px=p.fromLatLngToDivPixel(this.pos);if(!px)return;this.el.style.left=px.x+'px';this.el.style.top=px.y+'px';}
+    onRemove(){this.el&&this.el.remove();}
+  }
+  new HtmlMarker({map, position:{lat:40.42,lng:-3.7}});
+  google.maps.event.addListenerOnce(map,'idle',()=>{
+    setLog('idle zoom='+map.getZoom()+' tilt='+map.getTilt()+' type='+map.getMapTypeId());
+  });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDVRLXOTUUtAermFfK7cRC67RCw_FXvJS0&v=weekly&loading=async&callback=boot" async defer></script>
+</body></html>

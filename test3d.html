@@ -1,0 +1,14 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body,#map{margin:0;height:100%}</style></head>
+<body><div id="map"></div><div id="log" style="position:fixed;top:6px;left:6px;background:#fff;padding:4px 8px;font:12px sans-serif;z-index:99;border-radius:6px">init</div>
+<script>
+function setLog(t){document.getElementById('log').textContent=t;}
+function boot(){
+  const map = new google.maps.Map(document.getElementById('map'), {
+    center:{lat:40.42,lng:-3.7}, zoom:18.5, mapTypeId:'hybrid', tilt:45,
+    zoomControl:true, mapTypeControl:false, fullscreenControl:false, gestureHandling:'greedy'
+  });
+  google.maps.event.addListenerOnce(map,'idle',()=>{ setLog('OK zoom='+map.getZoom()+' tilt='+map.getTilt()); });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDVRLXOTUUtAermFfK7cRC67RCw_FXvJS0&v=weekly&loading=async&callback=boot" async defer></script>
+</body></html>

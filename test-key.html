@@ -1,0 +1,8 @@
+<!DOCTYPE html><html><head><meta charset=utf-8><title>test-key</title></head><body style="font:24px monospace;background:#111;color:#0f0;padding:40px">
+<div id=r>CARGANDO…</div>
+<script>
+window.gm_authFailure=function(){document.getElementById('r').textContent='FALLO AUTH: referrer denegado o API no habilitada';document.body.style.color='#f44';};
+function ok(){try{new google.maps.Map(document.createElement('div'),{center:{lat:40.4168,lng:-3.7038},zoom:18});document.getElementById('r').textContent='MAPS JS OK: la clave acepta este dominio';}catch(e){document.getElementById('r').textContent='FALLO: '+e.message;document.body.style.color='#f44';}}
+</script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDITCE7LGU_9OL85CAw5uSczJKT_VR0ueU&callback=ok"></script>
+</body></html>

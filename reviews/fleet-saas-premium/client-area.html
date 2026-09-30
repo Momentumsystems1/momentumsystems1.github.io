@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Momentum Systems — Portal Cliente</title>
+  <meta name="description" content="Portal de cliente Momentum Systems para seguimiento de integración FMS con movilidad conectada DGT 3.0." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    (function() {
+      try {
+        var auth = JSON.parse(localStorage.getItem('momentumPortalAuth') || 'null');
+        var valid = auth && auth.email && Number(auth.expiresAt) > Date.now();
+        if (!valid) {
+          sessionStorage.setItem('momentumPortalAuthMessage', 'Debe iniciar sesión antes de acceder al portal privado.');
+          window.location.replace('index.html?portal=login');
+        }
+      } catch (e) {
+        sessionStorage.setItem('momentumPortalAuthMessage', 'Debe iniciar sesión antes de acceder al portal privado.');
+        window.location.replace('index.html?portal=login');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/css/client-portal.css" />
+</head>
+<body class="portal-body">
+  <!-- =========================================================
+       PORTAL CLIENTE MOMENTUM SYSTEMS
+       EDITABLE RÁPIDO:
+       - Textos, títulos de calculadoras y mensajes del gestor: assets/js/client-portal.js
+       - Colores y aspecto general: assets/css/client-portal.css, variables :root
+       - Orden/estructura de bloques: este archivo client-area.html
+       ========================================================= -->
+  <div class="portal-orb portal-orb-a"></div>
+  <div class="portal-orb portal-orb-b"></div>
+
+  <div class="portal-shell">
+    <aside class="portal-sidebar" aria-label="Navegación del portal">
+      <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Plegar o desplegar barra lateral" title="Plegar / desplegar">
+        <span></span><span></span><span></span>
+      </button>
+
+      <a href="index.html" class="portal-brand" aria-label="Volver a Momentum Systems">
+        <span class="portal-brand-mark">M</span>
+        <span><strong>Momentum Systems</strong><em>Client Intelligence Portal</em></span>
+      </a>
+
+      <div class="sidebar-timeline" id="sidebarTimeline">
+        <span class="sidebar-timeline-label">Inicio timeline</span>
+        <div class="sidebar-timeline-item reached">
+          <strong id="sidebarTimelineName">Cliente</strong>
+          <small id="sidebarTimelineDate">Fecha de inicio</small>
+          <em>Objetivo cumplido: proceso iniciado</em>
+        </div>
+        <div class="sidebar-timeline-item next">
+          <strong>Siguiente proceso</strong>
+          <small>Línea dotted pendiente</small>
+          <em>Primera toma de contacto · gestor final pendiente</em>
+        </div>
+      </div>
+
+      <nav class="portal-nav">
+        <a href="#overview" class="portal-nav-item active"><span>Panel ejecutivo</span><small>Estado y prioridades</small><i>01</i></a>
+        <a href="#gestion" class="portal-nav-item"><span>Gestión comercial</span><small>Sin compromiso activo</small><i>02</i></a>
+        <a href="#calculadoras" class="portal-nav-item"><span>Calculadoras</span><small>ROI y servicio premium</small><i>03</i></a>
+        <a href="#integracion" class="portal-nav-item"><span>Integración FMS</span><small>Fase posterior a oferta</small><i>04</i></a>
+        <a href="#mensajes" class="portal-nav-item"><span>Live desk</span><small>Mensajería y chatbot</small><i>05</i></a>
+      </nav>
+
+      <div class="portal-sidebar-footer">
+        <span>Gestor</span>
+        <strong>No asignado en esta etapa</strong>
+        <p>Canal provisional de seguimiento activado. La primera acción pendiente es la toma de contacto.</p>
+      </div>
+    </aside>
+
+    <main class="portal-main">
+      <header class="portal-topbar">
+        <div>
+          <span class="portal-kicker"><span></span> Portal seguro de cliente</span>
+          <strong id="portalTopName">Área privada</strong>
+        </div>
+        <div class="portal-user">
+          <span id="portalCompany">Cliente corporativo</span>
+          <a class="portal-btn portal-btn-secondary" href="index.html">Web principal</a>
+          <button type="button" class="portal-logout" id="portalResetBtn">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <section class="portal-hero reveal" id="overview">
+        <div class="portal-hero-content">
+          <span class="portal-kicker"><span></span> Inicio de proceso registrado</span>
+          <h1 id="portalWelcome">Bienvenido. Ha iniciado el proceso.</h1>
+          <p id="portalStartCopy">Este portal privado centraliza el seguimiento del proceso de integración de su sistema de gestión de flota con la nueva capa de movilidad conectada DGT 3.0.</p>
+          <div class="portal-hero-proof-list" aria-label="Beneficios clave del proceso">
+            <div><span>01</span><strong>Cumplimiento V16 y movilidad conectada DGT 3.0</strong></div>
+            <div><span>02</span><strong>Trazabilidad documental de cada fase del proceso</strong></div>
+            <div><span>03</span><strong>Alineación con nuevas vías de financiación pública y privada</strong></div>
+            <div><span>04</span><strong>Mayor eficacia operativa desde el primer evento conectado</strong></div>
+          </div>
+          <a class="santander-banner" href="https://www.bancosantander.es/empresas/soluciones-empresas/consultoria-esg" target="_blank" rel="noopener noreferrer" aria-label="Abrir servicio de consultoría ESG y movilidad sostenible de Banco Santander">
+            <span>Recurso externo para movilidad sostenible</span>
+            <strong>Santander + Valora · Consultoría ESG y Plan de Movilidad</strong>
+            <em>Asesoramiento, financiación y tramitación de ayudas para empresas.</em>
+          </a>
+        </div>
+        <div class="portal-status-card glass-card">
+          <div class="status-pulse"><span></span> Acción pendiente</div>
+          <strong>Primera toma de contacto</strong>
+          <p>Fase no iniciada. El equipo de coordinación debe activar el primer contacto para recoger contexto, intereses, alcance general y responsables internos. El gestor final se asignará después de esta toma de contacto.</p>
+
+          <!-- EDITABLE: formulario de solicitud de reunión. Email destino y endpoint opcional en assets/js/client-portal.js -->
+          <form class="meeting-form" id="meetingForm">
+            <div class="meeting-form-title">Crear solicitud de reunión</div>
+            <div class="meeting-form-grid">
+              <label><span>Fecha</span><input id="meetingDate" type="date" required></label>
+              <label><span>Hora</span><input id="meetingTime" type="time" required></label>
+              <label class="meeting-form-wide"><span>Modalidad</span><select id="meetingMode"><option>Videollamada</option><option>Presencial</option><option>Llamada telefónica</option></select></label>
+              <label class="meeting-form-wide"><span>Comentario opcional</span><input id="meetingNotes" type="text" placeholder="Ej. Queremos revisar alcance con IT y operaciones"></label>
+            </div>
+            <button type="submit" class="portal-btn portal-btn-primary">Solicitar reunión</button>
+            <p class="form-status" id="meetingStatus" aria-live="polite"></p>
+          </form>
+
+          <div class="status-mini-grid">
+            <div><span>Compromiso</span><strong>0 €</strong></div>
+            <div><span>Oferta</span><strong>Pendiente</strong></div>
+            <div><span>Integración</span><strong>Bloqueada</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="portal-grid portal-grid-3 reveal">
+        <article class="portal-card commitment-card">
+          <span class="portal-card-label">Sin compromiso</span>
+          <h2>No adquiere ningún compromiso hasta aceptar la oferta.</h2>
+          <p>El portal muestra una evaluación previa. La contratación solo comenzará cuando la oferta económica ajustada sea aceptada formalmente.</p>
+        </article>
+        <article class="portal-card">
+          <span class="portal-card-label">Proceso</span>
+          <h2>Discovery → Oferta → Piloto medible</h2>
+          <p>Primero se entiende la necesidad real, después se entrega una propuesta ajustada y solo tras aceptación se valida la métrica con datos reales.</p>
+        </article>
+        <article class="portal-card">
+          <span class="portal-card-label">Integración</span>
+          <h2>FMS existente, sin sustitución</h2>
+          <p>La capa de integración añade eventos conectados, trazabilidad e inteligencia operativa sin reemplazar el sistema de gestión de flota del cliente.</p>
+        </article>
+      </section>
+
+      <section class="portal-section reveal" id="gestion">
+        <div class="section-head">
+          <span class="portal-kicker"><span></span> Timeline comercial</span>
+          <h2>Estado de su gestión con Momentum Systems</h2>
+          <p>Este timeline permite que el cliente vea exactamente en qué fase se encuentra el proceso y cuál es la próxima acción.</p>
+        </div>
+        <div class="process-timeline" id="commercialTimeline"></div>
+      </section>
+
+      <section class="portal-section reveal" id="calculadoras">
+        <div class="section-head section-head-row">
+          <div>
+            <span class="portal-kicker"><span></span> Simulación ejecutiva</span>
+            <h2>Calculadoras privadas del cliente</h2>
+            <p>Los títulos de ambas calculadoras son editables desde el bloque PORTAL_EDITABLE_TEXT en assets/js/client-portal.js.</p>
+          </div>
+          <div class="portal-note">Valores orientativos para conversación. La prueba permite ajustar las métricas a la realidad operativa del cliente.</div>
+        </div>
+
+        <div class="portal-calculator glass-card" id="portalCalcOperational">
+          <div class="calc-head">
+            <div>
+              <span class="portal-card-label">Calculadora 01</span>
+              <h3 id="opCalcTitle">Impacto económico de la operación conectada</h3>
+              <p id="opCalcSubtitle">Ahorro anual estimado al convertir incidencias V16 en eventos operativos estructurados.</p>
+            </div>
+            <div class="scenario-tabs" id="opScenarioTabs">
+              <button type="button" data-scenario="conservador">Conservador</button>
+              <button type="button" data-scenario="estandar" class="active">Estándar</button>
+              <button type="button" data-scenario="intensivo">Intensivo</button>
+            </div>
+          </div>
+          <div class="calc-layout">
+            <div class="calc-controls">
+              <label><span>Flota</span><output id="opOutFleet">5.000 vehículos</output><input type="range" id="opFleet" min="200" max="20000" step="100" value="5000"></label>
+              <label><span>Ratio anual de incidencias</span><output id="opOutRatio">15%</output><input type="range" id="opRatio" min="5" max="30" step="1" value="15"></label>
+              <label><span>Coste hora parada</span><output id="opOutHour">95 €/h</output><input type="range" id="opHour" min="35" max="180" step="5" value="95"></label>
+              <label><span>Incidencias no detectadas</span><output id="opOutInvisible">10%</output><input type="range" id="opInvisible" min="0" max="25" step="1" value="10"></label>
+              <label><span>Tiempo actual detección + coordinación</span><output id="opOutDelay">6 h</output><input type="range" id="opDelay" min="2" max="12" step="0.5" value="6"></label>
+              <aside class="calc-help-card portal-calc-manual" aria-label="Manual de uso de la calculadora operativa">
+                <span>Manual rápido</span>
+                <h4>Qué significa cada barra</h4>
+                <ul>
+                  <li><strong>Flota:</strong> vehículos incluidos en la estimación.</li>
+                  <li><strong>Ratio anual:</strong> frecuencia estimada de incidencias relevantes.</li>
+                  <li><strong>Coste hora:</strong> coste operativo por hora de parada.</li>
+                  <li><strong>No detectadas:</strong> eventos con baja visibilidad o documentación tardía.</li>
+                  <li><strong>Tiempo actual:</strong> detección, identificación y coordinación inicial.</li>
+                </ul>
+                <p>Use los sliders para aproximar su realidad operativa antes de solicitar validación técnica.</p>
+                <small>© 2026 Momentum Systems S.L.</small>
+              </aside>
+            </div>
+            <div class="calc-results">
+              <span>Ahorro operativo potencial / año</span>
+              <strong id="opSavings">0 €</strong>
+              <p>Estimación previa. El piloto permite calibrar downtime real, coste documental, incidencias invisibles y coordinación interna.</p>
+              <div class="metric-bars">
+                <div><span>Parada</span><i><b id="opBarTime"></b></i><em id="opValTime">0 €</em></div>
+                <div><span>Documentación</span><i><b id="opBarDoc"></b></i><em id="opValDoc">0 €</em></div>
+                <div><span>Invisibles</span><i><b id="opBarInvisible"></b></i><em id="opValInvisible">0 €</em></div>
+                <div><span>Coordinación</span><i><b id="opBarCoord"></b></i><em id="opValCoord">0 €</em></div>
+              </div>
+              <div class="calc-kpi-row">
+                <div><span>Modelo actual</span><strong id="opCurrentCost">0 €</strong></div>
+                <div><span>Modelo conectado</span><strong id="opConnectedCost">0 €</strong></div>
+                <div><span>Siguiente hito</span><strong id="opBreakEven">Validación operativa</strong></div>
+              </div>
+              <div class="portal-report-actions">
+                <button type="button" class="portal-btn portal-btn-primary" id="portalDownloadOpPdf">Descargar informe PDF</button>
+                <span>Informe ejecutivo con escenario, parámetros, tabla comparativa y nota de validación.</span>
+              </div>
+              <div class="portal-executive-grid">
+                <div><span>Impacto anual</span><strong id="portalOpDecisionImpact">0 €</strong><em>Potencial estimado</em></div>
+                <div><span>Potencial validable</span><strong id="portalOpDecisionPayback">Alto</strong><em>Requiere datos reales</em></div>
+                <div><span>Oportunidad</span><strong id="portalOpDecisionScore">Alta</strong><em>Modo comité</em></div>
+              </div>
+              <div class="portal-comparison-wrap">
+                <table class="portal-comparison-table">
+                  <thead><tr><th>Factor</th><th>Modelo actual</th><th>Modelo conectado</th><th>Mejora</th></tr></thead>
+                  <tbody>
+                    <tr><td>Detección</td><td>Manual</td><td>Evento V16/FMS</td><td>Activación temprana</td></tr>
+                    <tr><td>Tiempo parada</td><td id="portalCmpCurrentTime">0 €</td><td id="portalCmpConnectedTime">0 €</td><td id="portalCmpSavingTime">0 €</td></tr>
+                    <tr><td>Documentación</td><td>Reconstrucción</td><td>Trazabilidad origen</td><td id="portalCmpSavingDoc">0 €</td></tr>
+                    <tr><td>Incidencias invisibles</td><td>Riesgo parcial</td><td>Recuperación</td><td id="portalCmpSavingInvisible">0 €</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="portal-calculator glass-card" id="portalCalcPremium">
+          <div class="calc-head">
+            <div>
+              <span class="portal-card-label">Calculadora 02</span>
+              <h3 id="premiumCalcTitle">Servicio premium de asistencia conectada</h3>
+              <p id="premiumCalcSubtitle">Potencial anual de un servicio de asistencia premium propio activado por evento V16.</p>
+            </div>
+            <div class="scenario-tabs" id="premiumProfileTabs">
+              <button type="button" data-profile="aeropuerto" class="active">Aeroportuario</button>
+              <button type="button" data-profile="vacacional">Vacacional</button>
+              <button type="button" data-profile="ejecutivo">Ejecutivo</button>
+              <button type="button" data-profile="funcional">Funcional</button>
+            </div>
+          </div>
+          <div class="calc-layout">
+            <div class="calc-controls two-cols">
+              <label><span>Flota</span><output id="prOutFleet">1.200 vehículos</output><input type="range" id="prFleet" min="100" max="12000" step="100" value="1200"></label>
+              <label><span>Operaciones de alquiler / mes</span><output id="prOutOps">6.000</output><input type="range" id="prOps" min="500" max="60000" step="500" value="6000"></label>
+              <label><span>Duración media</span><output id="prOutDays">4 días</output><input type="range" id="prDays" min="1" max="15" step="0.5" value="4"></label>
+              <label><span>Precio servicio</span><output id="prOutPrice">8 €</output><input type="range" id="prPrice" min="3" max="25" step="0.5" value="8"></label>
+              <label><span>Contratación</span><output id="prOutAdoption">22%</output><input type="range" id="prAdoption" min="3" max="45" step="1" value="22"></label>
+              <label><span>Incidencias útiles</span><output id="prOutIncidence">4,5%</output><input type="range" id="prIncidence" min="1" max="12" step="0.5" value="4.5"></label>
+              <label><span>Coste asistencia</span><output id="prOutServiceCost">48 €</output><input type="range" id="prServiceCost" min="15" max="180" step="5" value="48"></label>
+              <label><span>Coste evitado</span><output id="prOutAvoided">125 €</output><input type="range" id="prAvoided" min="25" max="450" step="5" value="125"></label>
+              <aside class="calc-help-card portal-calc-manual" aria-label="Manual de uso de la calculadora de servicio premium">
+                <span>Manual rápido</span>
+                <h4>Lectura del servicio premium</h4>
+                <ul>
+                  <li><strong>Operaciones/mes:</strong> volumen comercial potencial del servicio.</li>
+                  <li><strong>Precio:</strong> tarifa por asistencia premium conectada.</li>
+                  <li><strong>Contratación:</strong> adopción estimada del cliente final.</li>
+                  <li><strong>Incidencias útiles:</strong> casos donde el servicio genera valor operativo.</li>
+                  <li><strong>Coste evitado:</strong> ahorro por actuación temprana y mejor coordinación.</li>
+                </ul>
+                <p>El resultado combina ingresos, coste de prestación y ahorro operativo evitado.</p>
+                <small>© 2026 Momentum Systems S.L.</small>
+              </aside>
+            </div>
+            <div class="calc-results">
+              <span>Beneficio anual neto estimado</span>
+              <strong id="prBenefit">0 €</strong>
+              <p>Preview comercial y financiero. La aceptación de oferta abre la prueba para validar precio, adopción, SLA y coste real.</p>
+              <div class="metric-bars">
+                <div><span>Ingresos</span><i><b id="prBarRevenue"></b></i><em id="prValRevenue">0 €</em></div>
+                <div><span>Coste servicio</span><i><b id="prBarCost"></b></i><em id="prValCost">0 €</em></div>
+                <div><span>Coste evitado</span><i><b id="prBarAvoided"></b></i><em id="prValAvoided">0 €</em></div>
+              </div>
+              <div class="calc-kpi-row calc-kpi-row-compact">
+                <div><span>Servicios/año</span><strong id="prSold">0</strong></div>
+                <div><span>Incidencias</span><strong id="prIncidents">0</strong></div>
+                <div><span>Margen guía</span><strong id="prMargin">0%</strong></div>
+                <div><span>€/vehículo</span><strong id="prPerVehicle">0 €</strong></div>
+              </div>
+              <div class="portal-report-actions">
+                <button type="button" class="portal-btn portal-btn-primary" id="portalDownloadPremiumPdf">Descargar informe PDF</button>
+                <span>Preview financiero exportable para comité interno.</span>
+              </div>
+              <div class="portal-executive-grid">
+                <div><span>Ingresos brutos</span><strong id="portalPrDecisionRevenue">0 €</strong><em>Base comercial</em></div>
+                <div><span>€/vehículo</span><strong id="portalPrDecisionVehicle">0 €</strong><em>Indicador unitario</em></div>
+                <div><span>Oportunidad</span><strong id="portalPrDecisionScore">Alta</strong><em>Servicio monetizable</em></div>
+              </div>
+              <div class="portal-comparison-wrap">
+                <table class="portal-comparison-table">
+                  <thead><tr><th>Factor</th><th>Parámetro</th><th>Resultado</th><th>Lectura</th></tr></thead>
+                  <tbody>
+                    <tr><td>Operaciones</td><td id="portalPrCmpOps">0</td><td id="portalPrCmpSold">0 servicios</td><td>Base de venta</td></tr>
+                    <tr><td>Ingresos</td><td id="portalPrCmpPrice">0 €</td><td id="portalPrCmpRevenue">0 €</td><td>Upsell anual</td></tr>
+                    <tr><td>Incidencias</td><td id="portalPrCmpIncidence">0%</td><td id="portalPrCmpManaged">0</td><td>Casos útiles</td></tr>
+                    <tr><td>Beneficio neto</td><td>Ingresos + evitado - coste</td><td id="portalPrCmpBenefit">0 €</td><td>Validar en piloto</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="portal-section reveal" id="integracion">
+        <div class="section-head">
+          <span class="portal-kicker"><span></span> Timeline técnico posterior</span>
+          <h2>Integración FMS: se activa después de la oferta aceptada</h2>
+          <p>La primera fase informa de que la toma de contacto está pendiente. El proceso técnico queda bloqueado hasta la aprobación comercial.</p>
+        </div>
+        <div class="integration-panel glass-card">
+          <div class="integration-lock"><span>Bloqueado</span><strong>Oferta no aceptada todavía</strong></div>
+          <div class="process-timeline process-timeline-tech" id="integrationTimeline"></div>
+        </div>
+      </section>
+
+      <section class="portal-section reveal live-desk-section" id="mensajes">
+        <div class="section-head section-head-row">
+          <div>
+            <span class="portal-kicker"><span></span> Live client desk</span>
+            <h2>Mensajería, asistente y trazabilidad SaaS</h2>
+            <p>Canal privado preparado para comunicación en tiempo real, registro de actividad y soporte asistido con Supabase.</p>
+          </div>
+          <span class="manager-badge tech-badge" id="liveConnectionBadge">Supabase ready</span>
+        </div>
+
+        <div class="saas-command-grid" aria-label="Capacidades Supabase activadas en el portal">
+          <article class="saas-capability-card glass-card">
+            <span>SSO</span>
+            <strong>Google / Microsoft</strong>
+            <p>Acceso empresarial con proveedores corporativos y sesión persistente.</p>
+          </article>
+          <article class="saas-capability-card glass-card">
+            <span>Realtime</span>
+            <strong>Mensajería live</strong>
+            <p>Canal privado con sincronización de mensajes y eventos del cliente.</p>
+          </article>
+          <article class="saas-capability-card glass-card">
+            <span>RLS</span>
+            <strong>Datos segmentados</strong>
+            <p>Políticas para que cada cliente solo vea su propio espacio.</p>
+          </article>
+          <article class="saas-capability-card glass-card">
+            <span>AI desk</span>
+            <strong>Asistente operativo</strong>
+            <p>Chatbot de apoyo para resolver dudas frecuentes del proceso.</p>
+          </article>
+        </div>
+
+        <div class="live-desk-layout">
+          <article class="live-panel glass-card">
+            <header class="live-panel-header">
+              <div>
+                <span class="portal-card-label">Canal privado</span>
+                <h3>Mensajería con coordinación Momentum</h3>
+                <p>Gestor no asignado en esta etapa. El gestor final se asignará después de la primera toma de contacto.</p>
+              </div>
+              <div class="live-presence"><span></span><strong id="livePresenceText">Canal preparado</strong></div>
+            </header>
+
+            <div class="live-thread" id="liveThread" aria-live="polite">
+              <article class="live-message system">
+                <small>Sistema</small>
+                <p>Canal preparado para registrar mensajes del cliente y actividad del proceso.</p>
+              </article>
+            </div>
+
+            <form class="live-message-form" id="liveMessageForm">
+              <label>
+                <span>Mensaje para coordinación</span>
+                <textarea id="liveMessageBody" rows="4" placeholder="Escriba una consulta sobre FMS, alcance, reunión, piloto o documentación..." required></textarea>
+              </label>
+              <div class="live-form-actions">
+                <button type="submit" class="portal-btn portal-btn-primary">Enviar mensaje</button>
+                <small id="liveMessageStatus">El mensaje quedará registrado en el canal del cliente.</small>
+              </div>
+            </form>
+          </article>
+
+          <article class="assistant-panel glass-card">
+            <header class="live-panel-header">
+              <div>
+                <span class="portal-card-label">Asistente inteligente</span>
+                <h3>Momentum Copilot</h3>
+                <p>Ayuda inmediata sobre proceso, oferta, integración FMS, piloto y documentación.</p>
+              </div>
+              <div class="bot-orb"><span></span></div>
+            </header>
+
+            <div class="bot-quick-actions" aria-label="Preguntas rápidas del asistente">
+              <button type="button" data-bot-prompt="¿Cuál es el siguiente paso del proceso?">Siguiente paso</button>
+              <button type="button" data-bot-prompt="¿Cuándo hay compromiso económico?">Compromiso</button>
+              <button type="button" data-bot-prompt="¿Qué se valida en el piloto?">Piloto</button>
+              <button type="button" data-bot-prompt="¿Cómo se integra con mi FMS?">Integración FMS</button>
+            </div>
+
+            <div class="ai-chat-log" id="aiChatLog" aria-live="polite">
+              <article class="ai-message bot">
+                <small>Momentum Copilot</small>
+                <p>Estoy preparado para resolver dudas generales del proceso. Para decisiones comerciales, el equipo de coordinación confirmará los detalles en la primera toma de contacto.</p>
+              </article>
+            </div>
+
+            <form class="ai-chat-form" id="aiChatForm">
+              <input id="aiChatInput" type="text" placeholder="Pregunte algo sobre el proceso..." autocomplete="off" required>
+              <button type="submit" class="portal-btn portal-btn-secondary">Preguntar</button>
+            </form>
+          </article>
+        </div>
+
+        <div class="portal-audit-strip glass-card">
+          <span>Audit trail</span>
+          <strong id="portalAuditSummary">Última actividad: portal iniciado</strong>
+          <p>Las interacciones relevantes pueden registrarse para seguimiento comercial, auditoría interna y continuidad del proceso.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-auth.js"></script>
+  <script src="assets/js/client-portal.js"></script>
+  <script src="assets/js/portal-saas.js"></script>
+</body>
+</html>

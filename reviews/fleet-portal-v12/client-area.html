@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Momentum Systems — Panel cliente</title>
+  <meta name="description" content="Panel privado de cliente Momentum Systems: calculadoras, procesos, documentación, mensajes y Motum." />
+  <meta name="theme-color" content="#11191f" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/client-portal.css" />
+</head>
+<body class="client-body">
+  <header class="client-topbar">
+    <div class="top-left">
+      <a href="index.html" class="client-logo" aria-label="Volver a Momentum Systems">
+        <span class="logo-mark"><i></i><i></i></span>
+        <strong>MOMENTUM SYSTEMS</strong>
+      </a>
+      <span class="bar-separator"></span>
+      <span class="project-title">Panel de control de proyecto <b></b></span>
+    </div>
+    <div class="top-right">
+      <div class="client-badge"><span class="badge-notice">1</span><strong>N</strong></div>
+      <span id="topClientName">Nombre cliente</span>
+      <span class="bar-separator"></span>
+      <span>Sesión nº <b id="sessionNumber">2</b></span>
+      <span class="bar-separator"></span>
+      <span id="todayLabel">Martes 21/05/2024</span>
+      <span class="bar-separator"></span>
+      <button class="icon-btn" title="Ajustes" type="button">⚙</button>
+      <a href="index.html" class="exit-link">Salir <span>↱</span></a>
+    </div>
+  </header>
+
+  <main class="client-shell">
+    <section class="client-intro-grid">
+      <article class="intro-card welcome-card">
+        <div class="security-orb">⌬</div>
+        <div>
+          <h1>Bienvenido/a a su portal privado Momentum Systems.</h1>
+          <p>Ha completado correctamente el STEP 1, el primer paso clave del proceso. En esta fase inicial, el avance del proyecto no implica ningún compromiso vinculante para el cliente. Este panel seguro, gestionado por Momentum Systems y supervisado por Inspide, ha sido creado para ofrecerle una experiencia transparente, organizada y trazable durante todo el seguimiento del proyecto.</p>
+        </div>
+      </article>
+
+      <article class="intro-card entry-card">
+        <div class="card-head-inline">
+          <h2>Entrada nº 3</h2>
+          <button class="small-action" type="button">Ver analítica</button>
+        </div>
+        <div class="entry-stats">
+          <div><span>◷ Última entrada</span><strong>21/05/2024<br>09:42</strong></div>
+          <div><span>⇱ Última salida</span><strong>21/05/2024<br>10:31</strong></div>
+          <div><span>▣ Días desde inicio</span><strong>3<br>días</strong></div>
+          <div class="warning"><span>⚠</span><p>Si no se activa el siguiente paso básico en 5 días, la cuenta quedará desactivada temporalmente.</p></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Panel principal de cliente">
+      <aside class="dash-column left-column">
+        <article class="dash-card calculator-card">
+          <div class="dash-card-title"><h2>▥ Calculadoras e informes</h2></div>
+
+          <div class="mini-calculator" id="opCalc">
+            <div class="mini-title"><h3>Calculadora de ahorro operativo</h3><button class="help" type="button" title="Ayuda">?</button></div>
+            <label><span>Consumo mensual actual (kWh)</span><input id="kwh" type="range" min="5000" max="70000" step="500" value="25000"><output id="kwhOut">25.000</output></label>
+            <label><span>Coste medio energía (€/kWh)</span><input id="energy" type="range" min="0.08" max="0.40" step="0.01" value="0.18"><output id="energyOut">0,18</output></label>
+            <label><span>Eficiencia esperada (%)</span><input id="eff" type="range" min="5" max="40" step="1" value="22"><output id="effOut">22 %</output></label>
+            <label><span>Reducción costes mantenimiento (%)</span><input id="maint" type="range" min="0" max="35" step="1" value="15"><output id="maintOut">15 %</output></label>
+            <div class="blue-result"><span>Ahorro operativo estimado anual</span><strong id="annualSaving">18.765 €</strong><em>↗ <b id="effNote">22%</b> vs. situación actual</em></div>
+          </div>
+
+          <div class="mini-calculator roi-block" id="roiBlock">
+            <div class="mini-title"><h3>Calculadora ROI / conectividad</h3><button class="help" type="button" title="Ayuda">?</button></div>
+            <label><span>Inversión estimada (€)</span><input id="investment" type="range" min="15000" max="250000" step="5000" value="85000"><output id="investmentOut">85.000</output></label>
+            <label><span>Vida útil (años)</span><input id="life" type="range" min="2" max="8" step="1" value="5"><output id="lifeOut">5</output></label>
+            <label><span>Beneficio anual estimado (€)</span><input id="benefit" type="range" min="5000" max="90000" step="500" value="18765"><output id="benefitOut">18.765</output></label>
+            <label><span>Tasa de descuento (%)</span><input id="discount" type="range" min="2" max="18" step="1" value="8"><output id="discountOut">8 %</output></label>
+            <div class="roi-result"><div><span>ROI estimado</span><strong id="roiOut">125%</strong></div><div><span>Payback estimado</span><strong id="paybackOut">2,3 años</strong></div></div>
+          </div>
+        </article>
+
+        <article class="dash-card pdf-card">
+          <div class="card-head-inline"><h2>▧ Histórico de PDFs</h2><button class="small-action" type="button">Ver todos</button></div>
+          <div class="pdf-table">
+            <div class="pdf-row head"><span>Fecha</span><span>Hora</span><span>Escenario</span><span>Resultado final</span><span>PDF</span></div>
+            <div class="pdf-row"><span>20/05/2024</span><span>16:14</span><span>Escenario base</span><span>Ahorro anual: 18.765 €</span><button>PDF</button></div>
+            <div class="pdf-row"><span>19/05/2024</span><span>11:02</span><span>Escenario optimizado</span><span>Ahorro anual: 22.340 €</span><button>PDF</button></div>
+            <div class="pdf-row"><span>18/05/2024</span><span>09:33</span><span>Escenario conservador</span><span>Ahorro anual: 12.980 €</span><button>PDF</button></div>
+          </div>
+        </article>
+      </aside>
+
+      <section class="dash-column center-column">
+        <article class="dash-card process-card">
+          <div class="dash-card-title"><h2>⌘ Procesos e integración</h2></div>
+          <div class="integration-state">
+            <div class="donut" id="donut"><span>25%</span><em>Completado</em></div>
+            <div class="progress-list">
+              <div><span class="dot blue"></span><p>STEP 1 completado</p><meter min="0" max="100" value="100"></meter><strong>100%</strong></div>
+              <div><span class="dot green"></span><p>Análisis técnico</p><meter min="0" max="100" value="25"></meter><strong>25%</strong></div>
+              <div><span class="dot grey"></span><p>Oferta pendiente</p><meter min="0" max="100" value="0"></meter><strong>0%</strong></div>
+              <div><span class="dot grey"></span><p>Integración FMS</p><meter min="0" max="100" value="0"></meter><strong>0%</strong></div>
+            </div>
+          </div>
+          <div class="timeline-block">
+            <h3>Línea de tiempo del proyecto</h3>
+            <div class="timeline-item done"><i>✓</i><div><strong>STEP 1 completado</strong><p>Información inicial recibida y validada.</p></div><span>20/05/2024<br>15:40</span></div>
+            <div class="timeline-item active"><i>2</i><div><strong>Análisis técnico</strong><p>Evaluación de viabilidad y requerimientos.</p></div><span>En curso<br>25%</span></div>
+            <div class="timeline-item"><i>3</i><div><strong>Oferta pendiente</strong><p>Elaboración y envío de propuesta comercial.</p></div><span>Pendiente</span></div>
+            <div class="timeline-item"><i>4</i><div><strong>Integración FMS</strong><p>Configuración e integración con su sistema FMS.</p></div><span>Pendiente</span></div>
+          </div>
+        </article>
+
+        <article class="dash-card summary-card">
+          <h2>Resumen del proyecto</h2>
+          <div class="summary-grid">
+            <div><span>Inicio del proyecto</span><strong>▣ 18/05/2024</strong></div>
+            <div><span>Responsable asignado</span><strong>♙ Equipo Momentum</strong></div>
+            <div><span>Próximo hito estimado</span><strong>▣ 27/05/2024</strong></div>
+          </div>
+        </article>
+      </section>
+
+      <aside class="dash-column right-column">
+        <article class="dash-card docs-card">
+          <div class="card-head-inline"><h2>▭ Documentos, mensajes y Motum</h2></div>
+          <div class="folder-panel">
+            <div class="card-head-inline sub"><h3>Carpetas compartidas</h3><button class="small-action" type="button">Ver todas</button></div>
+            <p class="muted-line">Compartido por Momentum Systems <em>(solo lectura)</em> 🔒</p>
+            <div class="folder-row"><span>📁 01_Propuesta_comercial</span><strong>3 archivos</strong><time>20/05/2024</time></div>
+            <div class="folder-row"><span>📁 02_Analisis_tecnico</span><strong>5 archivos</strong><time>21/05/2024</time></div>
+            <div class="folder-row"><span>📁 03_Documentacion_tecnica</span><strong>8 archivos</strong><time>20/05/2024</time></div>
+            <p class="muted-line upload">Subido por cliente <em>(lectura y escritura)</em> ⇧</p>
+            <div class="folder-row"><span>📁 00_Documentos_cliente</span><strong>2 archivos</strong><time>21/05/2024</time></div>
+          </div>
+        </article>
+
+        <article class="dash-card messages-card">
+          <div class="card-head-inline"><h2>Mensajes recientes</h2><button class="small-action" type="button">Ver todos</button></div>
+          <div class="message-line"><b>N</b><div><strong>Momentum Systems</strong><p>Hemos completado el análisis técnico inicial. Encontrará el informe preliminar en la carpeta compartida.</p></div><time>21/05/2024<br>10:21</time></div>
+          <div class="message-line user"><b>U</b><div><strong>Usted</strong><p>Gracias. Revisaremos la información y quedamos atentos a la propuesta.</p></div><time>21/05/2024<br>10:28</time></div>
+          <div class="message-line"><b>N</b><div><strong>Momentum Systems</strong><p>De acuerdo, cualquier consulta estamos a su disposición.</p></div><time>21/05/2024<br>10:30</time></div>
+        </article>
+
+        <article class="dash-card motum-card">
+          <div class="card-head-inline"><h2>Motum <span>(mensajería instantánea)</span></h2><em class="online">● En línea</em></div>
+          <div class="motum-grid">
+            <div class="whatsapp-box"><span>Notificaciones WhatsApp</span><strong>🟢 Activadas</strong><button class="small-action" type="button">Abrir chat Motum</button></div>
+            <div class="chat-box">
+              <span class="recent">Conversación reciente</span>
+              <div class="bot-message"><b>●</b><p><strong>Motum Bot</strong><br>Su proyecto está en análisis técnico. Le notificaremos cualquier actualización relevante.</p><time>10:31</time></div>
+              <div class="fake-input"><span>Escriba un mensaje...</span><button type="button">▷</button></div>
+            </div>
+          </div>
+        </article>
+      </aside>
+    </section>
+  </main>
+
+  <script src="assets/js/client-portal.js"></script>
+</body>
+</html>

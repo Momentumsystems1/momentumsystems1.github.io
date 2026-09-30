@@ -1,0 +1,32 @@
+name: Import Momentum Platform Review
+
+on:
+  push:
+    paths:
+      - '.github/workflows/import-momentum-preview.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download static build
+        run: |
+          curl -L --fail --retry 3 'https://sdmntprukwest.oaiusercontent.com/files/00000000-dcac-8243-b610-2cde65a5df4b/raw?se=2026-09-30T11%3A12%3A24Z&sp=r&sv=2026-02-06&sr=b&scid=c45e8fa1-aeef-5b0f-9e8a-b8d4b5471823&skoid=002823aa-689d-47ca-9347-108c20f4f00d&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-30T08%3A53%3A14Z&ske=2026-10-01T08%3A53%3A14Z&sks=b&skv=2026-02-06&sig=pFQl9aoQby1GS6Q3c3nK6vTvH5BztlVL9rwZte2e1jE%3D' -o /tmp/momentum-static-review.zip
+          rm -rf /tmp/momentum-review
+          mkdir -p /tmp/momentum-review
+          unzip -q /tmp/momentum-static-review.zip -d /tmp/momentum-review
+      - name: Publish review folder
+        run: |
+          rm -rf reviews/momentum-platform-v1
+          mkdir -p reviews/momentum-platform-v1
+          cp -a /tmp/momentum-review/. reviews/momentum-platform-v1/
+          touch reviews/momentum-platform-v1/.nojekyll
+          git config user.name "Momentum Preview Bot"
+          git config user.email "ceo@dctinvent.com"
+          git add reviews/momentum-platform-v1
+          git commit -m "Publish Momentum Platform V1 review" || exit 0
+          git push

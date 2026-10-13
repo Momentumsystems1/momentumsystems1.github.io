@@ -3,20 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="2;url=https://momentumsystems1.github.io/sentinelfamily-web/">
 <title>MY CLUSTER — redirigiendo</title>
 <style>
   body{font-family:system-ui,sans-serif;background:#0d1117;color:#e6edf3;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
-  .c{text-align:center;padding:24px}
+  .c{text-align:center;padding:24px;max-width:420px}
   a{color:#4d9fff;font-size:18px}
   p{color:#8b949e;font-size:14px}
 </style>
 </head>
 <body>
 <div class="c">
-  <p>La app ha movido de sitio. Redirigiendo…</p>
+  <p id="msg">Limpiando versión antigua de este navegador…</p>
   <a href="https://momentumsystems1.github.io/sentinelfamily-web/">Abrir MY CLUSTER (versión actual)</a>
 </div>
-<script>setTimeout(function(){location.replace('https://momentumsystems1.github.io/sentinelfamily-web/')},1500);</script>
+<script>
+var TARGET='https://momentumsystems1.github.io/sentinelfamily-web/';
+function go(){location.replace(TARGET);}
+async function limpiar(){
+  try{
+    if('serviceWorker' in navigator){
+      var rs=await navigator.serviceWorker.getRegistrations();
+      for(var i=0;i<rs.length;i++){await rs[i].unregister();}
+    }
+    if('caches' in window){
+      var ks=await caches.keys();
+      for(var j=0;j<ks.length;j++){await caches.delete(ks[j]);}
+    }
+  }catch(e){}
+  document.getElementById('msg').textContent='Redirigiendo a la versión actual…';
+  setTimeout(go,800);
+}
+limpiar();
+</script>
 </body>
 </html>

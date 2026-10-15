@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="dark"/>
+<title>Momentum Systems | Road Command Center · Executive Demo</title>
+<meta name="description" content="Road Command Center: demostración ejecutiva de inteligencia de movilidad, cartografía y capas operativas."/>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"/>
+<style>
+:root{--bg:#06110f;--surface:rgba(7,22,22,.88);--surface2:rgba(10,29,27,.88);--line:rgba(115,224,194,.17);--green:#55e2bd;--cyan:#8ce7ff;--fg:#effaf7;--muted:#99afa9;--yellow:#ffcc80;--red:#ff7185}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:#0a1618;color:var(--fg);font:13px/1.45 Inter,"Segoe UI",Arial,sans-serif;overflow:hidden}
+button,select,input{font:inherit}
+button{cursor:pointer}
+#map{position:fixed;inset:0;z-index:0;background:linear-gradient(160deg,#142b2b,#061114)}
+#map:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(2,10,11,.32),transparent 40%,rgba(2,10,11,.25))}
+.maplibregl-ctrl-attrib{font:10px "Segoe UI",Arial!important;background:rgba(6,18,18,.64)!important;color:#cfdfd9!important}
+.maplibregl-ctrl-attrib a{color:#b5fff0!important}
+.maplibregl-popup-content{background:#0c2424!important;color:#e9f9f5!important;border:1px solid var(--line);border-radius:12px!important;padding:14px!important;box-shadow:0 15px 50px #0008}
+.maplibregl-popup-tip{border-top-color:#0c2424!important}
+#app{position:relative;z-index:2;height:100%;pointer-events:none}
+#app>*{pointer-events:auto}
+header{position:absolute;top:14px;left:16px;right:16px;display:flex;align-items:center;gap:18px;padding:12px 16px;border:1px solid var(--line);border-radius:18px;background:rgba(5,16,17,.94);box-shadow:0 14px 46px #0008;backdrop-filter:blur(18px)}
+.mark{height:38px;width:38px;display:grid;place-items:center;border:1px solid #52e8bb80;border-radius:12px;background:radial-gradient(circle at 45% 35%,#31786f,#071e20);color:var(--green);font-size:23px}
+.brand strong{display:block;font-size:15px;letter-spacing:.035em}
+.brand span{font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+header .center{margin-left:auto;display:flex;align-items:center;gap:9px}
+.pill{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:30px;padding:7px 10px;color:#dceae7;background:#16302b91;font-size:11px}
+.dot{height:7px;width:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+.statusline{margin-left:3px;color:var(--muted);font-size:11px;white-space:nowrap}
+#citySelect{background:#102a28;color:#f2fff9;padding:8px 10px;border:1px solid #5bd9b140;border-radius:9px;max-width:160px}
+.demoswitch{border:1px solid #57bf9955;padding:8px 11px;border-radius:9px;background:#153b32;color:#d2fff2;font-weight:700}
+aside{position:absolute;top:90px;left:16px;bottom:16px;width:320px;display:flex;flex-direction:column;gap:12px;min-height:0;pointer-events:none!important}
+aside>*{pointer-events:auto}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:17px;backdrop-filter:blur(20px);box-shadow:0 10px 28px #0006}
+.section{padding:16px}
+.eyebrow{display:block;color:var(--green);font-weight:700;font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:5px}
+h1{font-size:18px;line-height:1.18;font-weight:650;margin:0 0 9px}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.13em;color:#d9eae5;margin:0}
+.sub{font-size:11px;color:var(--muted);margin:0}
+.notice{margin-top:10px;border-left:2px solid var(--yellow);background:#4f3b1e40;color:#fff2db;padding:8px 10px;border-radius:0 8px 8px 0;font-size:11px}
+.layers{min-height:0;overflow-y:auto;scrollbar-width:thin;flex:1}
+.panelTitle{display:flex;align-items:center;justify-content:space-between;padding:15px 16px 10px}
+.count{font-size:10px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 13px}
+.layer{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:65px;text-align:left;background:#19302d9c;color:var(--fg);border:1px solid #769b8e3c;border-radius:11px;padding:11px;transition:background .2s,border-color .2s}
+.layer:hover{background:#21443f}
+.layer.active{border-color:#55e2bd9f;background:linear-gradient(145deg,#1b5040b7,#132b29);box-shadow:inset 0 0 0 1px #52e4ac29}
+.layer b{font-size:11px;display:block;font-weight:650}
+.layer small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.layer .symbol{font-size:18px;color:var(--green);opacity:.95}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.metric{background:#ffffff09;border:1px solid #93e1c21b;border-radius:10px;padding:11px 9px}
+.metric b{display:block;font-size:21px;font-weight:720;line-height:1.2;font-variant-numeric:tabular-nums}
+.metric span{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.right{position:absolute;right:16px;top:90px;width:306px;display:flex;flex-direction:column;gap:11px;max-height:calc(100% - 110px);pointer-events:none!important}
+.right>*{pointer-events:auto}
+.live{display:flex;gap:8px;align-items:center;color:var(--green);font-size:10px;letter-spacing:.1em}
+#eventList{max-height:310px;overflow-y:auto;padding:0 10px 11px;scrollbar-width:thin}
+.event{border:1px solid #b3cabc1e;background:#d7fff509;border-radius:10px;padding:10px 12px;margin:7px 0;cursor:pointer;outline:0}
+.event:hover,.event:focus{border-color:#5bd9b199;background:#19443a9a}
+.eventHead{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.event b{font-size:11px}
+.event small{color:var(--muted);font-size:10px}
+.event p{font-size:11px;color:#c6dad1;margin:5px 0 0}
+.severity{font-size:9px;padding:2px 6px;border-radius:6px;background:#ff718528;color:#ffa2b0}
+.severity.med{background:#ffcc8022;color:#ffe5ab}
+.severity.low{background:#62dbb727;color:#a1ffdf}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.act{padding:11px 8px;border:1px solid #a7e2cb36;background:#10352d;color:#dcfff2;border-radius:10px;text-align:center;font-weight:700;font-size:11px}
+.act:hover{background:#1a5647}
+.footnote{color:var(--muted);font-size:10px;line-height:1.55;margin:0}
+footer{position:absolute;left:352px;right:338px;bottom:16px;display:flex;gap:8px;align-items:stretch;justify-content:center;pointer-events:none!important}
+footer>*{pointer-events:auto}
+.chip{border:1px solid #66dbb944;border-radius:10px;background:rgba(4,18,19,.9);padding:10px 12px;font-size:10px;color:#d4eee4;backdrop-filter:blur(15px)}
+.chip b{display:block;color:#70dfbb;font-size:10px;letter-spacing:.09em;margin-bottom:2px}
+.nativectrl{position:absolute;right:339px;bottom:102px;display:flex;flex-direction:column;gap:7px}
+.nativectrl button{border:1px solid #67d3b54f;border-radius:9px;background:#081e20e8;color:#e9fff4;min-width:36px;height:36px;font-size:17px}
+#toast{position:absolute;top:105px;left:50%;transform:translateX(-50%);background:#06231fea;border:1px solid #58dca48a;border-radius:11px;color:#eafff6;padding:11px 15px;box-shadow:0 10px 35px #0006;font-size:11px;max-width:70%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+#mapStatus{position:absolute;top:92px;left:352px;padding:8px 12px;color:#e7fdf4;background:#09211ed9;border:1px solid #56d4a744;border-radius:9px;max-width:280px;font-size:10px}
+.demoRibbon{color:#ffe6ac!important;border-color:#ffd18355!important;background:#644b2170!important}
+.mobileTools{display:none}
+@media(max-width:1120px){.right{width:275px}footer{right:305px}.nativectrl{right:307px}aside{width:290px}#mapStatus{left:322px}footer{left:322px}}
+@media(max-width:800px){header{top:7px;left:7px;right:7px;padding:9px;gap:8px}.brand strong{font-size:12px}.brand span{font-size:8px}.center{flex-wrap:wrap;gap:4px!important}.statusline{display:none}.pill{display:none}.demoswitch{padding:6px;font-size:10px}#citySelect{font-size:10px;padding:6px;max-width:102px}aside{top:77px;left:7px;width:240px;bottom:80px;gap:7px}.section{padding:11px}.grid{gap:5px;padding:0 7px 7px}.layer{min-height:57px;padding:7px}.layer small{font-size:9px}.right{display:none}footer{bottom:7px;left:7px;right:7px;overflow-x:auto;justify-content:flex-start}.chip{min-width:140px}.nativectrl{right:7px;bottom:94px}#mapStatus{left:255px;top:83px;max-width:180px}.metric b{font-size:16px}}
+@media(max-height:700px){aside{gap:7px}.section{padding:11px}.layer{min-height:55px}.right{max-height:calc(100% - 90px)}}
+</style>
+</head>
+<body>
+<div id="map" aria-label="Mapa cartográfico interactivo"></div>
+<div id="app">
+<header>
+  <div class="mark" aria-hidden="true">◇</div>
+  <div class="brand"><strong>MOMENTUM SYSTEMS</strong><span>Road Command Center · G3000</span></div>
+  <div class="center">
+    <span class="pill demoRibbon"><span class="dot" style="background:var(--yellow);box-shadow:none"></span>DEMO · DATOS SIMULADOS</span>
+    <span class="statusline">Mapa OSM · actualización de escena local</span>
+    <select id="citySelect" aria-label="Seleccionar ciudad">
+      <option value="madrid">Madrid</option><option value="barcelona">Barcelona</option><option value="valencia">Valencia</option><option value="bilbao">Bilbao</option>
+    </select>
+    <button class="demoswitch" id="switchMode" type="button">VISTA EMPRESA</button>
+  </div>
+</header>
+<aside>
+  <div class="panel section">
+    <span class="eyebrow">Operational mobility intelligence</span>
+    <h1 id="heading">Visibilidad operativa de la movilidad</h1>
+    <p class="sub" id="subtitle">Incidencias, flotas, aparcamiento y movilidad urbana en una única superficie geoespacial.</p>
+    <div class="notice">Prototipo de presentación. Las incidencias, posiciones V16, disponibilidad y métricas de esta pantalla son datos ficticios.</div>
+  </div>
+  <div class="panel layers">
+    <div class="panelTitle"><h2>Capas operativas</h2><span class="count">SELECCIÓN MULTICAPA</span></div>
+    <div class="grid">
+      <button class="layer active" data-layer="incidents" aria-pressed="true"><span><b>DGT / SCT</b><small>Incidencias · demo</small></span><span class="symbol">⚠</span></button>
+      <button class="layer active" data-layer="v16" aria-pressed="true"><span><b>V16 / Flotas</b><small>Eventos IoT · demo</small></span><span class="symbol">⌁</span></button>
+      <button class="layer" data-layer="parking" aria-pressed="false"><span><b>Parking</b><small>Ocupación · demo</small></span><span class="symbol">P</span></button>
+      <button class="layer" data-layer="charging" aria-pressed="false"><span><b>Recarga EV</b><small>Nodos · demo</small></span><span class="symbol">⚡</span></button>
+      <button class="layer" data-layer="transport" aria-pressed="false"><span><b>Transporte</b><small>Paradas · demo</small></span><span class="symbol">▤</span></button>
+      <button class="layer" data-layer="cameras" aria-pressed="false"><span><b>Cámaras</b><small>Localizaciones · demo</small></span><span class="symbol">◎</span></button>
+    </div>
+    <div class="panelTitle" style="padding-top:7px"><h2>Indicadores de escenario</h2><span class="count">NO TELEMETRÍA REAL</span></div>
+    <div class="metrics" style="padding:0 12px 14px">
+      <div class="metric"><b id="countIncident">—</b><span>Incidencias</span></div>
+      <div class="metric"><b id="countV16">—</b><span>V16 activas</span></div>
+      <div class="metric"><b id="countParking">—</b><span>Parkings</span></div>
+      <div class="metric"><b id="countCharge">—</b><span>Puntos EV</span></div>
+      <div class="metric"><b id="countTransport">—</b><span>Transporte</span></div>
+      <div class="metric"><b id="countCamera">—</b><span>Cámaras</span></div>
+    </div>
+  </div>
+</aside>
+<section class="right">
+  <div class="panel" style="padding:15px">
+    <div class="live"><span class="dot"></span> CENTRO DE CONTROL · ESCENARIO</div>
+    <h2 style="margin:8px 0">Situación en <span id="currentCity">Madrid</span></h2>
+    <p class="sub">Selecciona un incidente para centrar el mapa y consultar sus atributos.</p>
+  </div>
+  <div class="panel">
+    <div class="panelTitle"><h2>Registro de eventos</h2><span class="count" id="eventCount">—</span></div>
+    <div id="eventList"></div>
+  </div>
+  <div class="panel section">
+    <span class="eyebrow">Funciones de presentación</span>
+    <div class="actions">
+      <button class="act" id="fitScene">ENCUADRAR</button>
+      <button class="act" id="camera3d">VISTA 3D</button>
+      <button class="act" id="makeRoute">TRAZAR RUTA</button>
+      <button class="act" id="exportReport">EXPORTAR JSON</button>
+    </div>
+    <p class="footnote" style="margin-top:11px">Mapa base: OpenFreeMap / OpenStreetMap. Capas de demostración internas y no oficiales. La ruta es una línea esquemática, no navegación calculada.</p>
+  </div>
+</section>
+<div id="mapStatus" role="status">Inicializando cartografía…</div>
+<div class="nativectrl">
+  <button id="zoomIn" title="Acercar" aria-label="Acercar">+</button>
+  <button id="zoomOut" title="Alejar" aria-label="Alejar">−</button>
+  <button id="myLocation" title="Mi ubicación (con permiso)" aria-label="Mi ubicación">⌖</button>
+</div>
+<footer>
+  <div class="chip"><b>CAPA CARTOGRÁFICA</b>OpenFreeMap · mapa real OSM</div>
+  <div class="chip"><b>CAPAS DE EVENTOS</b>Ficción controlada para demo</div>
+  <div class="chip"><b>ARQUITECTURA OBJETIVO</b>DGT 3.0 · API FMS · V16</div>
+  <div class="chip"><b>CONEXIÓN</b>Sin backend ni tokens privados</div>
+</footer>
+<div id="toast" role="status"></div>
+</div>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script>
+(function(){
+'use strict';
+var byId=function(id){return document.getElementById(id);};
+var names={madrid:'Madrid',barcelona:'Barcelona',valencia:'Valencia',bilbao:'Bilbao'};
+var cities={
+ madrid:{center:[-3.70379,40.41678],zoom:11.8,
+  incident:[['M-30 · Enlace norte','Retención de tráfico · escenario',-3.676,40.464,'high'],
+    ['A-2 · Acceso aeropuerto','Incidencia técnica · escenario',-3.577,40.441,'med'],
+    ['A-5 · Operación urbana','Trabajos de mantenimiento · escenario',-3.745,40.405,'low'],
+    ['M-40 · Sector oeste','Reducción de carril · escenario',-3.807,40.448,'med']]},
+ barcelona:{center:[2.1734,41.3851],zoom:12.1,
+  incident:[['Ronda Litoral · B-10','Retención de tráfico · escenario',2.188,41.374,'high'],
+    ['C-31 · Acceso este','Trabajos en calzada · escenario',2.235,41.395,'med'],
+    ['B-20 · Ronda de Dalt','Tráfico denso · escenario',2.108,41.432,'med'],
+    ['Diagonal · Área central','Obras de movilidad · escenario',2.157,41.391,'low']]},
+ valencia:{center:[-0.3763,39.4699],zoom:12.2,
+  incident:[['V-30 · Tramo oeste','Retención puntual · escenario',-0.433,39.443,'high'],
+    ['Av. del Puerto','Obras de mantenimiento · escenario',-0.341,39.463,'med'],
+    ['V-21 · Acceso norte','Circulación lenta · escenario',-0.354,39.521,'low']]},
+ bilbao:{center:[-2.935,43.263],zoom:12.1,
+  incident:[['A-8 · Entrada oeste','Retención · escenario',-2.984,43.276,'high'],
+    ['N-634 · Zona central','Obras programadas · escenario',-2.909,43.251,'med'],
+    ['BI-631 · Enlace','Incidencia técnica · escenario',-2.868,43.285,'low']]}
+};
+var scene='madrid', business=false, pitch3d=false, route=false;
+var enabled={incidents:true,v16:true,parking:false,charging:false,transport:false,cameras:false};
+var map=null,ready=false,toastTimer=0,allFeatures=[];
+var layers={incidents:{color:'#ff7f86',shape:8,kind:'Incidencia'},v16:{color:'#63e2c1',shape:8,kind:'V16 IoT'},parking:{color:'#89b9ff',shape:8,kind:'Parking'},charging:{color:'#facf78',shape:8,kind:'Carga EV'},transport:{color:'#bba6ff',shape:8,kind:'Transporte'},cameras:{color:'#91d9f5',shape:8,kind:'Cámara'}};
+function sleepToast(msg){var t=byId('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},3600);}
+function seedFeatures(){
+ var c=cities[scene],cx=c.center[0],cy=c.center[1],features=[];
+ c.incident.forEach(function(x,i){features.push({id:scene+'-INC-'+i,group:'incidents',title:x[0],description:x[1],lon:x[2],lat:x[3],severity:x[4],source:'ESCENARIO DE DEMOSTRACIÓN'});});
+ var pts={
+  v16:[[.02,.014],[-.035,.017],[.047,-.02],[-.024,-.028]],
+  parking:[[.016,-.012],[-.028,-.019],[.033,.025],[-.018,.033]],
+  charging:[[.018,.023],[-.027,.015],[.037,-.015]],
+  transport:[[.007,.012],[-.009,.024],[.028,-.024],[-.021,-.015]],
+  cameras:[[.016,-.024],[-.033,.028],[.03,.021]]
+ };
+ var captions={
+  v16:['Unidad V16 A · demo','Unidad V16 B · demo','Unidad V16 C · demo','Unidad V16 D · demo'],
+  parking:['Parking Centro · demo','Parking Norte · demo','Parking Este · demo','Parking Sur · demo'],
+  charging:['Estación EV 01 · demo','Estación EV 02 · demo','Estación EV 03 · demo'],
+  transport:['Nodo multimodal 01 · demo','Parada principal · demo','Conexión interurbana · demo','Parada local · demo'],
+  cameras:['Cámara 01 · demo','Cámara 02 · demo','Cámara 03 · demo']
+ };
+ Object.keys(pts).forEach(function(group){pts[group].forEach(function(p,i){features.push({id:scene+'-'+group+'-'+i,group:group,title:captions[group][i],description:group==='v16'?'Evento de activación simulado':group==='parking'?'Disponibilidad simulada':group==='charging'?'Conector / estado simulado':group==='transport'?'Punto geográfico simulado':'Ubicación simulada',lon:cx+p[0],lat:cy+p[1],severity:'low',source:'ESCENARIO DE DEMOSTRACIÓN'});});});
+ allFeatures=features;
+}
+function geojson(group){return{type:'FeatureCollection',features:allFeatures.filter(function(x){return x.group===group;}).map(function(x){return{type:'Feature',geometry:{type:'Point',coordinates:[x.lon,x.lat]},properties:{id:x.id,title:x.title,description:x.description,group:x.group,severity:x.severity,source:x.source}};})};}
+function renderMap(){
+ if(!ready)return;
+ Object.keys(layers).forEach(function(g){
+  var source=map.getSource('rcc-'+g);if(source)source.setData(geojson(g));
+  var id='rcc-points-'+g;if(map.getLayer(id))map.setLayoutProperty(id,'visibility',enabled[g]?'visible':'none');
+ });
+ updateRoute();
+}
+function loadLayers(){
+ if(!map||!map.isStyleLoaded())return;
+ Object.keys(layers).forEach(function(g){
+  if(!map.getSource('rcc-'+g))map.addSource('rcc-'+g,{type:'geojson',data:geojson(g)});
+  if(!map.getLayer('rcc-points-'+g)){
+    map.addLayer({id:'rcc-points-'+g,type:'circle',source:'rcc-'+g,layout:{visibility:enabled[g]?'visible':'none'},
+      paint:{'circle-radius':['interpolate',['linear'],['zoom'],7,5,14,10,17,14],'circle-color':layers[g].color,
+      'circle-stroke-width':3,'circle-stroke-color':'#081e1c','circle-opacity':.94}});
+    (function(group){
+      map.on('click','rcc-points-'+group,function(e){if(!e.features||!e.features.length)return;var p=e.features[0].properties;var f=allFeatures.find(function(a){return a.id===p.id});if(f)selectFeature(f);});
+      map.on('mouseenter','rcc-points-'+group,function(){map.getCanvas().style.cursor='pointer';});
+      map.on('mouseleave','rcc-points-'+group,function(){map.getCanvas().style.cursor='';});
+    })(g);
+  }
+ });
+ if(!map.getSource('rcc-route'))map.addSource('rcc-route',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+ if(!map.getLayer('rcc-route-line'))map.addLayer({id:'rcc-route-line',type:'line',source:'rcc-route',paint:{'line-color':'#5ee8c8','line-width':5,'line-dasharray':[2,1.5]}});
+ ready=true;renderMap();
+}
+function updateRoute(){
+ if(!ready)return;
+ var f=route?allFeatures.find(function(f){return f.group==='incidents';}):null;
+ var fc={type:'FeatureCollection',features:f?[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:[cities[scene].center,[(f.lon+cities[scene].center[0])/2+.01,(f.lat+cities[scene].center[1])/2],[f.lon,f.lat]]}}]:[]};
+ var src=map.getSource('rcc-route');if(src)src.setData(fc);
+}
+function safe(t){return String(t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});}
+function selectFeature(f){
+ if(map){map.flyTo({center:[f.lon,f.lat],zoom:Math.max(map.getZoom(),13.5),speed:.85});
+ new maplibregl.Popup({closeButton:true,offset:15,maxWidth:'280px'}).setLngLat([f.lon,f.lat]).setHTML('<strong style="color:#76f1cb">'+safe(f.title)+'</strong><p style="margin:6px 0">'+safe(f.description)+'</p><small style="color:#ffcc80">Datos simulados · no oficiales</small><br><small>'+f.lat.toFixed(5)+', '+f.lon.toFixed(5)+'</small>').addTo(map);}
+ sleepToast('Seleccionado: '+f.title+' · datos de demostración');
+}
+function drawList(){
+ var incidents=allFeatures.filter(function(f){return f.group==='incidents';});
+ byId('eventCount').textContent=incidents.length+' incidencias';
+ byId('eventList').innerHTML=incidents.map(function(f,i){return '<div class="event" role="button" tabindex="0" data-id="'+safe(f.id)+'"><div class="eventHead"><b>'+safe(f.title)+'</b><span class="severity '+safe(f.severity)+'">'+(f.severity==='high'?'ALTA':f.severity==='med'?'MEDIA':'BAJA')+'</span></div><p>'+safe(f.description)+'</p><small>ESCENARIO · '+f.lat.toFixed(3)+', '+f.lon.toFixed(3)+'</small></div>';}).join('');
+ Array.from(byId('eventList').querySelectorAll('.event')).forEach(function(el){var launch=function(){var f=allFeatures.find(function(e){return e.id===el.dataset.id});if(f)selectFeature(f);};el.onclick=launch;el.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();launch();}};});
+}
+function setMetrics(){
+ [['Incident','incidents'],['V16','v16'],['Parking','parking'],['Charge','charging'],['Transport','transport'],['Camera','cameras']].forEach(function(a){byId('count'+a[0]).textContent=allFeatures.filter(function(f){return f.group===a[1];}).length;});
+}
+function cityChanged(newCity){
+ if(!cities[newCity])return;scene=newCity;byId('currentCity').textContent=names[scene];byId('citySelect').value=scene;
+ seedFeatures();setMetrics();drawList();if(map){map.flyTo({center:cities[scene].center,zoom:cities[scene].zoom,pitch:pitch3d?48:22,essential:true,speed:.8});renderMap();}
+ sleepToast(names[scene]+' · capas de demostración actualizadas');
+}
+function initializeMap(){
+ if(!window.maplibregl){byId('mapStatus').textContent='No ha cargado MapLibre. Comprueba tu conexión a Internet.';return;}
+ try{map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/liberty',center:cities[scene].center,zoom:cities[scene].zoom,pitch:22,bearing:-7,attributionControl:true,antialias:true});
+ map.on('load',function(){ready=true;loadLayers();byId('mapStatus').textContent='MAPA OPERATIVO · OpenFreeMap / OSM';});
+ map.on('error',function(e){var msg=e&&e.error&&e.error.message||'';if(msg&&/style|tile|network|fetch/i.test(msg)){byId('mapStatus').textContent='Cartografía no disponible. Comprueba Internet.';}});
+ }catch(e){byId('mapStatus').textContent='No se pudo iniciar la cartografía.';}
+}
+document.querySelectorAll('.layer').forEach(function(btn){btn.onclick=function(){var g=btn.dataset.layer;enabled[g]=!enabled[g];btn.classList.toggle('active',enabled[g]);btn.setAttribute('aria-pressed',String(enabled[g]));renderMap();sleepToast(layers[g].kind+' · '+(enabled[g]?'visible':'oculta')+' · demo');};});
+byId('citySelect').onchange=function(){cityChanged(this.value);};
+byId('switchMode').onclick=function(){business=!business;document.body.classList.toggle('businessMode',business);this.textContent=business?'VISTA OPERATIVA':'VISTA EMPRESA';byId('heading').textContent=business?'Fleet Intelligence · Executive View':'Visibilidad operativa de la movilidad';byId('subtitle').textContent=business?'Integración conceptual de eventos V16 y gestión de flotas. Sin conexión a sistemas bancarios.':'Incidencias, flotas, aparcamiento y movilidad urbana en una única superficie geoespacial.';sleepToast('Vista empresarial de ejemplo · no existe autenticación ni integración con terceros');};
+byId('fitScene').onclick=function(){if(map)map.flyTo({center:cities[scene].center,zoom:cities[scene].zoom,pitch:pitch3d?48:22,bearing:-7});};
+byId('camera3d').onclick=function(){pitch3d=!pitch3d;this.textContent=pitch3d?'VISTA 2D':'VISTA 3D';if(map)map.easeTo({pitch:pitch3d?58:0,bearing:pitch3d?-18:0,duration:850});};
+byId('makeRoute').onclick=function(){route=!route;this.textContent=route?'BORRAR RUTA':'TRAZAR RUTA';updateRoute();sleepToast(route?'Ruta esquemática DEMO, no calculada por un motor de navegación':'Ruta eliminada');};
+byId('zoomIn').onclick=function(){if(map)map.zoomIn();};byId('zoomOut').onclick=function(){if(map)map.zoomOut();};
+byId('myLocation').onclick=function(){
+ if(!navigator.geolocation){sleepToast('Este navegador no admite geolocalización');return;}
+ sleepToast('Solicitando permiso de ubicación…');
+ navigator.geolocation.getCurrentPosition(function(p){if(map)map.flyTo({center:[p.coords.longitude,p.coords.latitude],zoom:14,essential:true});sleepToast('Ubicación del dispositivo centrada · permiso concedido');},function(){sleepToast('Ubicación no disponible o permiso denegado');},{timeout:10000,enableHighAccuracy:false});
+};
+byId('exportReport').onclick=function(){var payload={product:'Momentum Systems Road Command Center',kind:'escenario de demostración, datos ficticios',generatedAt:new Date().toISOString(),city:scene,enabledLayers:enabled,features:allFeatures};var b=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(b),a=document.createElement('a');a.href=url;a.download='MOMENTUM_RCC_DEMO_'+scene+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},5000);};
+seedFeatures();setMetrics();drawList();initializeMap();
+})();
+</script>
+</body>
+</html>

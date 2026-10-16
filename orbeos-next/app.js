@@ -25,7 +25,8 @@
     markers:{incidents:[],parking:[],bikes:[],pmr:[],origin:[],destination:[],multi:[]},
     pick:null, origin:null,destination:null,route:null,multiRoute:null,
     originText:'', destinationText:'', loadingRoute:false,
-    selectedOrb:0, currentTrafficTest:0, lastChecked:null,
+    selectedOrb:0, orbExpanded:true, orbMini:false, selectedPoint:null, pointPopup:null,
+    immersive:false, immersiveTimer:null, currentTrafficTest:0, lastChecked:null,
     activityDemo:[
       {title:'Obras en la calzada',description:'Ejemplo de incidencia · no corresponde a un evento confirmado',road:'Zona de ejemplo',severity:'warning',source:'DEMO',kind:'obras',lat:41.394,lon:2.153},
       {title:'Congestión de tráfico',description:'Dato de muestra para validar la representación',road:'Zona de ejemplo',severity:'warning',source:'DEMO',kind:'trafico',lat:41.405,lon:2.188},
@@ -75,9 +76,20 @@
       btn.addEventListener('click',()=>selectOrb(i));orbit.appendChild(btn);
     });
     setText('orbCaption',`Modo: ${orbitActions[state.selectedOrb].label}`);
+    syncOrbState();
+  }
+  function syncOrbState(){
+    const wrap=$('orbeWrap');
+    wrap.classList.toggle('orb-mini',state.orbMini);
+    wrap.classList.toggle('orb-collapsed',!state.orbExpanded);
+    const core=$('orbCore');
+    core.setAttribute('aria-expanded',String(state.orbExpanded&&!state.orbMini));
+    core.setAttribute('aria-label',state.orbMini?'Restaurar orbe (clic o doble clic)':state.orbExpanded?'Cerrar comandos (doble clic para minimizar)':'Abrir comandos (doble clic para minimizar)');
+    core.title=state.orbMini?'Clic para restaurar':'Clic: abrir/cerrar · Doble clic: reducir · Arrastra para mover';
   }
   function selectOrb(i){
     state.selectedOrb=i;
+    state.orbMini=false;state.orbExpanded=true;syncOrbState();
     // Keep existing DOM buttons: CSS animates their new mathematically spaced positions.
     Array.from($('orbeOrbit').children).forEach((b,j)=>{
       const shift=(j-i+orbitActions.length)%orbitActions.length;
@@ -86,7 +98,10 @@
       b.classList.toggle('selected',j===i);
     });
     setText('orbCaption',`Modo: ${orbitActions[i].label}`);
-    openView(orbitActions[i].id);
+    const mode=orbitActions[i].id;
+    if(mode==='actividad'&&!state.layers.incidents){state.layers.incidents=true;drawMarkers();}
+    openView(mode);
+    if(mode==='mapa')message('Mapa listo: arrastra para pantalla completa temporal · clic en un punto para acciones');
   }
   function openView(view){
     if(view==='mapa'){state.view='mapa';state.panel='actividad'}
@@ -138,6 +153,10 @@
   function addMarker(layer,point,element,anchor='left'){
     if(!state.map||!Number.isFinite(Number(point[0]))||!Number.isFinite(Number(point[1])))return null;
     const marker=new maplibregl.Marker({element,anchor}).setLngLat(point).addTo(state.map);
+    element.addEventListener('click',ev=>{
+      ev.preventDefault();ev.stopPropagation();
+      handlePointSelection(point,{label:element.querySelector('.map-text b')?.textContent||'Punto en mapa',detail:element.querySelector('.map-text small')?.textContent||'',kind:layer});
+    });
     state.markers[layer].push(marker);return marker;
   }
   function clearLayer(layer){state.markers[layer]?.forEach(marker=>marker.remove());state.markers[layer]=[]}
@@ -152,6 +171,76 @@
     if(state.layers.bikes){state.bikes.slice(0,30).forEach(f=>{const p=stationCoords(f);if(!p)return;const el=markerEl('♧',f.name||'Estación bici','CityBikes · ubicación','bike');addMarker('bikes',p,el)})}
     if(state.layers.pmr&&state.demo){const c=getCenter();[[.016,-.006],[-.014,.008],[.004,.018]].forEach((xy,i)=>{const el=markerEl('♿',`Punto PMR ${i+1}`,'DEMO · sin evaluación técnica','demo bike');addMarker('pmr',[c[0]+xy[0],c[1]+xy[1]],el)})}
     drawEndpoints();
+  }
+  // A map click always yields a real coordinate. A source marker may add sourced metadata.
+  // Never infer parking availability, PMR suitability, traffic or an ETA from the coordinate.
+  function handlePointSelection(point,info={}){
+    if(state.pick){
+      const target=state.pick;
+      setPick(null);setRoutePoint(target,point,info.label||coordsText(point));
+      state.map?.flyTo({center:point,zoom:Math.max(14,state.map.getZoom()),duration:700});
+      drawPanel();message(`Punto ${target==='origin'?'de inicio':'de destino'} marcado en el mapa`);
+      return;
+    }
+    if(!state.map)return;
+    state.selectedPoint={point:[...point],label:info.label||'Punto seleccionado',detail:info.detail||'',kind:info.kind||'mapa'};
+    state.map.flyTo({center:point,zoom:Math.max(15,state.map.getZoom()),duration:900,essential:true});
+    showPointOptions();
+    message(`Punto seleccionado · ${coordsText(point)} · menú contextual abierto`);
+  }
+  function dismissPoint(){state.pointPopup?.remove();state.pointPopup=null;state.selectedPoint=null;}
+  function showPointOptions(){
+    if(!state.map||!state.selectedPoint)return;
+    state.pointPopup?.remove();
+    const {point,label,detail,kind}=state.selectedPoint;
+    const wrap=document.createElement('div');wrap.className='point-actions';
+    const head=document.createElement('div');head.className='point-actions-heading';
+    const name=document.createElement('strong');name.textContent=label;
+    const sub=document.createElement('small');sub.textContent=`${coordsText(point)} · ${detail|| (kind==='mapa'?'Coordenadas del mapa':'Origen: '+kind)}`;
+    head.append(name,sub);wrap.appendChild(head);
+    const menu=document.createElement('div');menu.className='point-actions-grid';
+    const opts=[
+      ['origin','◎','Marcar inicio'],['destination','⚑','Marcar destino'],
+      ['parking','P','Parking cerca'],['bikes','♧','Bicis cerca'],
+      ['incidents','⚠','Incidencias'],['copy','⧉','Copiar coordenadas']
+    ];
+    opts.forEach(([action,icon,title])=>{
+      const b=document.createElement('button');b.type='button';b.dataset.pointAction=action;
+      const i=document.createElement('span');i.textContent=icon;const t=document.createElement('span');t.textContent=title;
+      b.append(i,t);b.addEventListener('click',ev=>{ev.stopPropagation();void executePointAction(action)});menu.appendChild(b);
+    });
+    wrap.appendChild(menu);
+    const popup=new maplibregl.Popup({closeButton:true,closeOnClick:false,offset:28,maxWidth:'325px',className:'orbe-point-popup',focusAfterOpen:false})
+      .setLngLat(point).setDOMContent(wrap).addTo(state.map);
+    popup.on('close',()=>{if(state.pointPopup===popup){state.pointPopup=null;state.selectedPoint=null}});
+    state.pointPopup=popup;
+  }
+  async function executePointAction(action){
+    const selection=state.selectedPoint;if(!selection)return;
+    const p=[...selection.point];const label=selection.label==='Punto seleccionado'?coordsText(p):selection.label;
+    if(action==='origin'||action==='destination'){
+      setRoutePoint(action,p,label);dismissPoint();openView('navegador');
+      message((action==='origin'?'Inicio':'Destino')+' fijado: '+label);return;
+    }
+    if(action==='copy'){
+      try{await navigator.clipboard.writeText(coordsText(p));message('Coordenadas copiadas: '+coordsText(p))}
+      catch{message('Coordenadas: '+coordsText(p)+' · selecciónalas en el menú si necesitas copiarlas')}
+      return;
+    }
+    if(['parking','bikes','incidents'].includes(action)){
+      state.layers[action]=true;drawMarkers();openView('capas');
+      dismissPoint();
+      message('Consultando '+(action==='parking'?'aparcamientos':action==='bikes'?'bicicletas':'incidencias')+' cerca del punto seleccionado…');
+      await refreshAll(p);return;
+    }
+  }
+  function setImmersiveMap(enabled){
+    if(state.immersive===enabled)return;
+    clearTimeout(state.immersiveTimer);state.immersive=enabled;
+    document.body.classList.toggle('map-immersive',enabled);
+    const resize=()=>{try{state.map?.resize()}catch{}};
+    requestAnimationFrame(resize);
+    state.immersiveTimer=setTimeout(resize,enabled?360:390);
   }
   function stationCoords(f){const lat=f.lat??f.latitude??f.location?.latitude;const lon=f.lon??f.lng??f.longitude??f.location?.longitude;return Number.isFinite(+lat)&&Number.isFinite(+lon)?[+lon,+lat]:null}
   function drawEndpoints(){
@@ -184,7 +273,9 @@
       state.map.addControl(new maplibregl.NavigationControl({showCompass:false}),'bottom-left');
       state.map.on('load',()=>{state.mapReady=true;message('Mapa CARTO / OSM · conectado a teselas públicas');drawMarkers();redrawLines();syncTraffic()});
       state.map.on('style.load',()=>{redrawLines();syncTraffic()});
-      state.map.on('click',e=>{if(state.pick){const point=[e.lngLat.lng,e.lngLat.lat];const target=state.pick;setPick(null);setRoutePoint(target,point,coordsText(point));drawPanel();message(`Punto ${target==='origin'?'de inicio':'de destino'} seleccionado en el mapa`)}});
+      state.map.on('click',e=>handlePointSelection([e.lngLat.lng,e.lngLat.lat]));
+      state.map.on('dragstart',()=>{dismissPoint();setImmersiveMap(true)});
+      state.map.on('dragend',()=>{setImmersiveMap(false)});
       state.map.on('moveend',()=>{const c=getCenter();state.center=c;setText('areaCoords',`${c[1].toFixed(3)}°, ${c[0].toFixed(3)}°`)});
       let tileErrorCount=0;
       state.map.on('error',e=>{if(!e?.error)return;if(++tileErrorCount<=2)message('El proveedor del mapa ha notificado un error de tesela. Puedes alternar a satélite.')});
@@ -274,8 +365,8 @@
     if(layer==='pmr'&&state.layers.pmr)message('Capa PMR DEMO. No representa rutas accesibles certificadas.');
     drawPanel();
   }
-  async function refreshAll(){
-    const [lon,lat]=getCenter();
+  async function refreshAll(atPoint=null){
+    const [lon,lat]=Array.isArray(atPoint)?atPoint:getCenter();
     message('Consultando fuentes públicas…');
     state.status.backend='loading';state.status.incidents='loading';state.status.parking='loading';state.status.bikes='loading';state.status.azure='loading';renderSourceSummary();
     // Parallel requests; one failing provider never blocks others.
@@ -345,7 +436,21 @@
     $('mapFullscreen').onclick=()=>{const e=$('map').parentElement;if(!document.fullscreenElement)e.requestFullscreen?.().then(()=>state.map?.resize());else document.exitFullscreen?.()};
     document.addEventListener('fullscreenchange',()=>setTimeout(()=>state.map?.resize(),150));
     $('orbeOrbit').addEventListener('mousedown',e=>e.stopPropagation());
-    $('orbCore').onclick=()=>selectOrb((state.selectedOrb+1)%orbitActions.length);enableOrbDrag();
+    const core=$('orbCore');let singleTimer=null;
+    core.addEventListener('click',()=>{
+      clearTimeout(singleTimer);
+      singleTimer=setTimeout(()=>{
+        if(state.orbMini){state.orbMini=false;state.orbExpanded=true;}
+        else state.orbExpanded=!state.orbExpanded;
+        syncOrbState();
+      },260);
+    });
+    core.addEventListener('dblclick',e=>{
+      clearTimeout(singleTimer);e.preventDefault();e.stopPropagation();
+      state.orbMini=!state.orbMini;state.orbExpanded=!state.orbMini;syncOrbState();
+      message(state.orbMini?'Orbe minimizado · clic para restaurar':'Orbe restaurado');
+    });
+    enableOrbDrag();
     document.querySelectorAll('.right-tabs button').forEach(b=>b.onclick=()=>{state.panel=b.dataset.panel;document.querySelectorAll('.right-tabs button').forEach(x=>x.classList.toggle('active',x===b));drawPanel()});
     $('panelBody').addEventListener('click',async e=>{
       const button=e.target.closest('[data-action],[data-layer-toggle]');if(!button)return;
@@ -362,7 +467,7 @@
     });
     $('searchPlace').onclick=async()=>{const q=$('globalSearch').value.trim();if(!q)return;message('Buscando '+q);try{const a=await geocodeQuery(q);state.map?.flyTo({center:a.point,zoom:12.5});setText('areaName',a.name.split(',').slice(0,2).join(','));message('Ubicación: '+a.name)}catch(e){message('Búsqueda: '+e.message)}};
     $('globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter')$('searchPlace').click()});
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')setPick(null)});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){setPick(null);dismissPoint();setImmersiveMap(false)}});
     $('settingsBtn').onclick=()=>{$('apiBaseInput').value=state.apiBase;$('allowDemo').checked=state.demo;$('settingsModal').classList.remove('hidden')};
     $('closeSettings').onclick=()=>{$('settingsModal').classList.add('hidden')};
     $('settingsModal').addEventListener('click',e=>{if(e.target.id==='settingsModal')$('closeSettings').click()});

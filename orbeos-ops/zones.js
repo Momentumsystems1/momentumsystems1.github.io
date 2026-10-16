@@ -105,7 +105,7 @@ const id=$('opsCity').value;if(!id){$('opsCity').focus();return}
 if(zone(id)){focus(id);return}
 if(st.zones.length>=6){$('opsHealth').textContent='Máximo 6 zonas para respetar los servicios públicos';return}
 const c=cities.find(x=>x.id===id);st.zones.push({...c,status:'loading',events:[],sources:{},note:'Esperando consulta',checked:null});
-persist();paint();$('opsCity').value='';void refresh(true);
+persist();paint();$('opsCity').value='';if(st.running){void query(zone(id))}else{void refresh(true)};
 }
 function remove(id){
 if(st.zones.length<2)return;st.zones=st.zones.filter(z=>z.id!==id);
@@ -121,7 +121,7 @@ function showMain(){
 $('map')?.scrollIntoView({behavior:'smooth',block:'center'});
 const z=zone(st.active);if(z)window.ORBEOS_OPS_BRIDGE?.focus(z.id,z.lon,z.lat,z.name);
 }
-function persist(){localStorage.setItem('orbeosOpsZones',JSON.stringify(st.zones.map(z=>z.id)))}
+
 function load(){
 let ids=['barcelona','madrid','valencia','sevilla'];
 try{const saved=JSON.parse(localStorage.getItem('orbeosOpsZones')||'null');if(Array.isArray(saved)&&saved.length)ids=saved.filter(x=>typeof x==='string').slice(0,6)}catch{}

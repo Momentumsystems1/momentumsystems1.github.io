@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#091331" />
+  <title>ORBEOS OPS · Momentum Road Command Center</title>
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css?v=4" />
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-orb"></span><strong>ORBEOS</strong><span class="brand-divider"></span><span class="brand-full">Momentum <b>Road Command Center</b></span></div>
+    <div class="top-right"><div class="searchbox"><span class="small-icon">⌕</span><input id="globalSearch" placeholder="Buscar una ciudad o ubicación..." aria-label="Buscar ciudad" /><button id="searchPlace" aria-label="Buscar">Ir</button></div><span id="modeChip" class="mode-chip">● Cargando datos</span><span id="headerClock" class="header-clock"></span><button id="settingsBtn" class="icon-button" aria-label="Configuración">⚙</button></div>
+  </header>
+  <aside class="side-nav">
+    <nav id="mainNav">
+      <button class="nav-item active" data-view="inicio"><span class="nav-glyph">⌂</span>Inicio</button>
+      <button class="nav-item" data-view="zonas"><span class="nav-glyph">▦</span>Centro multizona</button>
+      <button class="nav-item" data-view="mapa"><span class="nav-glyph">▣</span>Mapa</button>
+      <button class="nav-item" data-view="navegador"><span class="nav-glyph">↗</span>Navegador</button>
+      <button class="nav-item" data-view="multi"><span class="nav-glyph">⇶</span>Multi-ruta <span class="mini-tag">DEMO</span></button>
+      <button class="nav-item" data-view="capas"><span class="nav-glyph">▱</span>Capas</button>
+      <button class="nav-item" data-view="sistemas"><span class="nav-glyph">◉</span>Fuentes y estado</button>
+    </nav>
+    <div class="side-separator"></div><div class="nav-label">MOVILIDAD</div>
+    <button class="nav-item mini" data-layer="incidents"><span class="nav-glyph danger">△</span>Incidencias</button>
+    <button class="nav-item mini" data-layer="parking"><span class="nav-glyph blue">P</span>Aparcamientos</button>
+    <button class="nav-item mini" data-layer="bikes"><span class="nav-glyph green">♧</span>Bicicletas</button>
+    <button class="nav-item mini" data-layer="traffic"><span class="nav-glyph">≋</span>Tráfico Azure</button>
+    <div class="side-bottom"><span class="soft-dot"></span> BASE ORIGINAL CONSERVADA<br/><small>ORBEOS NEXT · Multizona · Vista experimental</small><a href="https://orbeos1.onrender.com/" class="original-link" target="_blank" rel="noopener">← Abrir versión original</a></div>
+  </aside>
+  <main class="main-content">
+    <div class="headline"><div><h1 id="pageTitle">Vista general</h1><p id="pageSubtitle">Una capa operativa para la movilidad conectada</p></div><div class="headline-actions"><span class="demo-outline">PREVIEW · EN DESARROLLO</span><button class="small-btn" id="locateBtn">◎ Mi ubicación</button><button class="small-btn" id="refreshBtn">↻ Actualizar zona</button></div></div>
+    <section class="kpi-row">
+      <article class="kpi crystal"><div class="kpi-icon">🚘</div><div><strong id="kpiVehicles">—</strong><span id="kpiVehiclesMode" class="data-badge demo">DEMO</span><small>Vehículos de flota</small></div></article>
+      <article class="kpi crystal"><div class="kpi-icon cyan">⇄</div><div><strong id="kpiRoutes">—</strong><span id="kpiRoutesMode" class="data-badge demo">DEMO</span><small>Rutas en operación</small></div></article>
+      <article class="kpi crystal"><div class="kpi-icon red">⚠</div><div><strong id="kpiIncidents">—</strong><span id="kpiIncidentsMode" class="data-badge">—</span><small>Incidencias en zona</small></div></article>
+      <article class="kpi crystal"><div class="kpi-icon blue">P</div><div><strong id="kpiParking">—</strong><span id="kpiParkingMode" class="data-badge">—</span><small>Aparcamientos OSM</small></div></article>
+      <article class="kpi crystal"><div class="kpi-icon green">♧</div><div><strong id="kpiBikes">—</strong><span id="kpiBikesMode" class="data-badge">—</span><small>Estaciones de bicicletas</small></div></article>
+    </section>
+    <section id="watchCenter" class="watch-center crystal" aria-label="Centro de vigilancia multizona">
+      <header class="watch-head">
+        <div class="watch-heading"><span class="watch-live-dot"></span><div><h2>Centro de operaciones · Multizona</h2><p>Vistas ligeras · Datos públicos cuando respondan · Abre el mapa principal para operar</p></div></div>
+        <div class="watch-actions"><span class="watch-count" id="watchCount">4 zonas</span><label class="watch-select-label" for="addZoneSelect">Añadir zona</label><select id="addZoneSelect" aria-label="Ciudad para añadir a vigilancia"><option value="">Selecciona ciudad…</option></select><button id="addZoneBtn" class="watch-action primary">+ Añadir</button><button id="refreshZonesBtn" class="watch-action">↻ Consultar todas</button><button id="pauseZonesBtn" class="watch-action">Ⅱ Pausar</button></div>
+      </header>
+      <div class="watch-info"><span id="watchHealth">Comprobando fuentes DGT / SCT / Madrid…</span><span>Actualización cada 3 min · Zonas guardadas en este navegador</span></div>
+      <div class="watch-grid" id="watchGrid" aria-live="polite"></div>
+      <div class="watch-foot"><span>● FEED = consulta real con fuente confirmada</span><span>○ SIN DATOS = no se ha podido verificar la fuente</span><span>DEMO = solo recursos expresamente simulados</span><button id="zonesDetailBtn" class="watch-action">Abrir mapa principal →</button></div>
+    </section>
+    <div class="workspace">
+      <section class="map-stage crystal" aria-label="Mapa de movilidad">
+        <div id="map"></div>
+        <div id="mapUnavailable" class="map-unavailable hidden">El mapa no ha podido cargar. Revisa la conexión o el proveedor de teselas.</div>
+        <div class="map-controls glass"><button id="styleStreet" class="selected">◧ Mapa</button><button id="styleLight">◨ Claro</button><button id="styleSatellite">◈ Satélite</button><button id="pickHelp" title="Ayuda de selección">⌖ Pick point</button></div>
+        <div class="area-chip glass"><span class="soft-dot"></span><span id="areaName">Barcelona y área metropolitana</span> <span id="areaCoords" class="muted-small"></span></div>
+        <div id="pickBanner" class="pick-banner hidden">Selecciona un punto en el mapa · ESC para cancelar</div>
+        <div class="immersive-hint glass" aria-hidden="true">MAPA COMPLETO · Suelta para volver a los paneles</div>
+        <div class="orbe-wrap" id="orbeWrap"><div class="orbe-orbit" id="orbeOrbit"></div><div class="orbe-children" id="orbeChildren"></div><button id="orbCore" class="orbe-core" aria-label="Abrir comandos"><span class="orb-symbol">◈</span><span class="orb-name">ORBEOS</span><small>CONTROL</small></button><div class="orb-caption" id="orbCaption">Selecciona una función</div></div>
+        <div class="map-bottom"><span id="mapNotice" class="glass map-notice">Iniciando cartografía...</span><button id="mapFullscreen" class="glass square-btn" title="Pantalla completa">⛶</button></div>
+      </section>
+      <aside class="right-panel crystal"><div class="right-header"><div><h2 id="panelTitle">Actividad y eventos</h2><small id="panelSubtitle">Verificación de fuentes de datos</small></div><span id="panelMode" class="data-badge">FUENTE</span></div><div class="right-tabs" role="tablist"><button data-panel="actividad" class="active">Actividad</button><button data-panel="navegador">Navegador</button><button data-panel="capas">Capas</button><button data-panel="multi">Multi</button></div><div class="panel-body" id="panelBody"></div><div class="panel-footer" id="panelFooter"><button id="panelRefresh">↻ Volver a consultar</button></div></aside>
+    </div>
+    <section class="bottom-row">
+      <article class="bottom-card crystal"><header><h3>Sistemas conectados</h3><button data-view="sistemas">Ver todos →</button></header><div id="sourceSummary" class="source-summary"></div></article>
+      <article class="bottom-card crystal"><header><h3>Estado de operación</h3><span class="data-badge demo">DEMO / REAL</span></header><div class="operations-info"><div><strong id="routesActive">—</strong><small>Rutas de ejemplo</small></div><div><strong id="eventsKnown">—</strong><small>Incidencias del feed</small></div><div><strong id="sourcesActive">—</strong><small>Fuentes disponibles</small></div></div><div id="routeStrip" class="route-strip"></div><p class="help-text">Los datos de flota son demostrativos hasta conectar telemetría autorizada.</p></article>
+      <article class="bottom-card crystal"><header><h3>Incidencias por tipo</h3><span id="incidentSummaryMode" class="data-badge">SIN DATOS</span></header><div id="incidentBars" class="incident-bars"></div></article>
+    </section>
+    <footer class="footerline">ORBEOS · Momentum Systems — Proyecto en desarrollo <span>Las fuentes externas pueden fallar. Los elementos DEMO nunca representan información real.</span></footer>
+  </main>
+</div>
+<div id="settingsModal" class="modal-cover hidden"><div class="modal crystal"><div class="modal-header"><h2>Conexión del Command Center</h2><button id="closeSettings">×</button></div><p>El frontend consulta exclusivamente las APIs permitidas. Las claves Azure permanecen en el backend privado.</p><label for="apiBaseInput">URL del backend (sin /api)</label><input id="apiBaseInput" placeholder="https://command-center-backend-40az.onrender.com"/><div class="check-row"><input type="checkbox" id="allowDemo" checked/><label for="allowDemo">Mostrar ejemplos DEMO si no existe una fuente de flota</label></div><div class="modal-actions"><button id="saveSettings" class="primary-btn">Guardar y actualizar</button></div><p class="help-text">No introduzcas claves ni tokens aquí. Esta pantalla es para configurar únicamente la URL pública del servidor.</p></div></div>
+<script>
+(function(){
+ let started=false;
+ function loadApp(){if(started)return;started=true;const app=document.createElement('script');app.src='./app.js?v=4';document.body.appendChild(app)}
+ const sources=['https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js','https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'];let idx=0;
+ function tryLoad(){if(idx>=sources.length){loadApp();return}const script=document.createElement('script');script.src=sources[idx++];script.async=true;const timer=setTimeout(()=>{script.remove();tryLoad()},5500);script.onload=()=>{clearTimeout(timer);loadApp()};script.onerror=()=>{clearTimeout(timer);tryLoad()};document.body.appendChild(script)}
+ tryLoad();
+})();
+</script>
+</body>
+</html>

@@ -9,12 +9,12 @@
   <link rel="icon" href="./logo.png" type="image/png">
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoZgH/1k2g+o0fM=" crossorigin="">
+  <link rel="stylesheet" href="./leaflet.css?v=20261027-fix1">
   <style>
     :root {color-scheme:light;--navy:#071824;--navy2:#10293a;--cyan:#0ba4c9;--line:#e6edf1;--ink:#153043;--muted:#647a89;--surface:#fff}
-    *{box-sizing:border-box}body{margin:0;font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:#f3f7fa}
+    *{box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden}body{margin:0;font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:#f3f7fa}
     button,input{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
-    .shell{display:grid;grid-template-columns:342px minmax(0,1fr);height:100dvh;min-height:550px}
+    .shell{display:grid;grid-template-columns:342px minmax(0,1fr);height:100dvh;min-height:0;width:100%;overflow:hidden}
     .sidebar{background:#fff;z-index:900;box-shadow:3px 0 25px #112b3d14;display:flex;flex-direction:column;min-width:0}
     .brand{background:linear-gradient(140deg,#061721,#0a2d42);color:white;padding:22px 22px 20px}
     .brand-top{display:flex;align-items:center;gap:12px}
@@ -46,8 +46,8 @@
     .button + .button{margin-top:8px}
     .sidebar-bottom{border-top:1px solid var(--line);padding:13px 20px 17px}
     .sidebar-bottom p{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
-    .map-area{position:relative;min-width:0;background:#dce9e6}
-    #map{height:100%;width:100%}
+    .map-area{position:relative;min-width:0;min-height:0;overflow:hidden;background:#dce9e6}
+    #map{position:absolute;inset:0;height:100%;width:100%;overflow:hidden}
     .float{position:absolute;z-index:600}
     .heading{left:20px;top:18px;max-width:min(380px,calc(100% - 130px));background:#fff;box-shadow:0 9px 30px #164a5a27;border:1px solid #ffffffdd;border-radius:13px;padding:11px 15px}
     .heading strong{font-size:13px}.heading div{font-size:11px;color:#6a8190}
@@ -232,7 +232,10 @@
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
     L.control.zoom({position:'bottomright'}).addTo(map);
     map.on('click',onMapClick);
+    // Recalculate after CSS and grid layout have stabilized.
+    requestAnimationFrame(()=>requestAnimationFrame(()=>map.invalidateSize({pan:false})));
   }
+  window.addEventListener('resize',()=>{if(map)map.invalidateSize({pan:false})});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 </script>
 </body>

@@ -1,242 +1,48 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#071824">
-  <meta name="description" content="MY CLUSTER — exploración web de la interfaz y mapa, sin registro ni datos familiares.">
-  <title>MY CLUSTER · Explorar</title>
-  <link rel="icon" href="./logo.png" type="image/png">
-  <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
-  <link rel="stylesheet" href="./leaflet.css?v=20261027-fix1">
-  <style>
-    :root {color-scheme:light;--navy:#071824;--navy2:#10293a;--cyan:#0ba4c9;--line:#e6edf1;--ink:#153043;--muted:#647a89;--surface:#fff}
-    *{box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden}body{margin:0;font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:#f3f7fa}
-    button,input{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
-    .shell{display:grid;grid-template-columns:342px minmax(0,1fr);height:100dvh;min-height:0;width:100%;overflow:hidden}
-    .sidebar{background:#fff;z-index:900;box-shadow:3px 0 25px #112b3d14;display:flex;flex-direction:column;min-width:0}
-    .brand{background:linear-gradient(140deg,#061721,#0a2d42);color:white;padding:22px 22px 20px}
-    .brand-top{display:flex;align-items:center;gap:12px}
-    .brand img{width:46px;height:46px;object-fit:contain;border-radius:12px;background:#fff; padding:3px}
-    h1,h2,h3,p{margin:0}h1{font-size:22px;font-weight:850;letter-spacing:.04em}h1 span{color:#35cae8}
-    .brand p{color:#a8c8d7;font-size:12px;margin-top:1px}
-    .mode{font-size:10px;letter-spacing:.14em;color:#8eecfb;font-weight:800;margin-top:18px}
-    .nav{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:12px;border-bottom:1px solid var(--line)}
-    .nav button{border:0;background:transparent;border-radius:10px;padding:10px 0 8px;color:#627988;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:700}
-    .nav button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
-    .nav button.active{color:#087c9d;background:#e7f7fb}
-    .content{flex:1;overflow-y:auto;padding:20px 20px 15px}
-    .kicker{font-size:11px;color:#0a8ba6;text-transform:uppercase;letter-spacing:.1em;font-weight:900;margin-bottom:6px}
-    h2{font-size:23px;letter-spacing:-.035em;line-height:1.15;margin-bottom:9px}
-    .intro{font-size:13px;color:var(--muted);margin-bottom:19px}
-    .panel{border:1px solid var(--line);background:#fff;border-radius:16px;padding:16px;margin-bottom:12px}
-    .panel.soft{background:#f3fafb;border-color:#d9eff4}
-    .panel h3{font-size:14px;margin-bottom:7px}
-    .panel p{color:var(--muted);font-size:12px;line-height:1.55}
-    .tiny{font-size:11px!important}
-    .status{display:flex;align-items:center;gap:9px;font-size:12px;color:#3d596b}
-    .dot{width:8px;height:8px;flex:none;border-radius:99px;background:#18a37f}
-    .dot.gray{background:#b4bdc5}
-    .button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:11px;padding:12px 14px;font-weight:750;border:0;transition:transform .15s;width:100%}
-    .button:active{transform:scale(.985)}
-    .primary{background:#079ab9;color:white}
-    .secondary{background:#eef6f8;color:#0c647e;border:1px solid #d8edf3}
-    .button:disabled{opacity:.5;cursor:not-allowed}
-    .button + .button{margin-top:8px}
-    .sidebar-bottom{border-top:1px solid var(--line);padding:13px 20px 17px}
-    .sidebar-bottom p{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
-    .map-area{position:relative;min-width:0;min-height:0;overflow:hidden;background:#dce9e6}
-    #map{position:absolute;inset:0;height:100%;width:100%;overflow:hidden}
-    .float{position:absolute;z-index:600}
-    .heading{left:20px;top:18px;max-width:min(380px,calc(100% - 130px));background:#fff;box-shadow:0 9px 30px #164a5a27;border:1px solid #ffffffdd;border-radius:13px;padding:11px 15px}
-    .heading strong{font-size:13px}.heading div{font-size:11px;color:#6a8190}
-    .tools{right:18px;top:18px;display:flex;flex-direction:column;gap:9px}
-    .tool{width:45px;height:45px;border:1px solid #e0eaee;border-radius:12px;background:#fff;box-shadow:0 5px 22px #123d5229;font-size:21px;color:#175067;display:grid;place-items:center}
-    .tool:hover{background:#eefafb}
-    .bottom-note{left:20px;bottom:28px;max-width:min(420px,calc(100% - 40px));background:#0a2635ec;backdrop-filter:blur(10px);color:#dcf0f6;padding:12px 14px;border-radius:13px;font-size:11px;box-shadow:0 5px 25px #16354133}
-    .bottom-note b{color:white}
-    .tag{display:inline-block;font-size:10px;font-weight:800;border-radius:99px;background:#e0f5f7;color:#087f96;padding:4px 9px;margin-bottom:9px}
-    .steps{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-    .steps span{background:#edf4f6;padding:5px 8px;border-radius:8px;color:#4b6573;font-size:11px}
-    .input{border:1px solid #dbe5ea;border-radius:10px;padding:12px;width:100%;background:white;color:#153043;margin:7px 0 10px}
-    .place{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 0;border-top:1px solid #e6edf1}
-    .place:first-child{border-top:0}
-    .place-name{font-size:12px;font-weight:700}
-    .place small{font-size:10px;color:#68818f}
-    .place button{border:1px solid #d8e8ec;border-radius:7px;background:white;color:#0a819c;padding:5px 8px}
-    .muted{color:#647a89}
-    #alert{position:absolute;z-index:2000;top:16px;left:50%;transform:translateX(-50%);background:#0c3445;color:#fff;border-radius:10px;padding:10px 15px;box-shadow:0 7px 26px #0003;display:none;text-align:center;font-size:12px;max-width:80%}
-    .is-hidden{display:none!important}
-    .mapfallback{position:absolute;inset:0;z-index:100;display:grid;place-items:center;background:linear-gradient(125deg,#deeae7,#c6dfdb);color:#365863}
-    .mapfallback div{padding:25px;text-align:center;max-width:320px;background:#ffffffe0;border-radius:15px}
-    .leaflet-container{font:inherit}
-    @media(max-width:820px){
-      .shell{display:flex;flex-direction:column;height:100dvh;min-height:0}
-      .sidebar{order:2;height:47dvh;min-height:270px;width:100%;box-shadow:0 -3px 20px #1234}
-      .brand{padding:10px 15px}.brand img{width:32px;height:32px}.brand h1{font-size:16px}
-      .brand p,.mode{display:none}
-      .brand-top{gap:8px}.nav{padding:5px 8px;gap:1px}.nav button{padding:5px 0;font-size:10px}.nav button svg{width:17px;height:17px}
-      .content{padding:12px 16px}.sidebar-bottom{padding:7px 16px}.sidebar-bottom p{display:none}
-      .sidebar-bottom .button{padding:8px}
-      .map-area{order:1;flex:1;min-height:0}
-      .heading{top:12px;left:12px;padding:8px 10px}.tools{top:12px;right:12px}
-      .tool{width:37px;height:37px;font-size:17px}
-      .bottom-note{bottom:15px;left:12px;padding:8px 11px}
-    }
-  </style>
-</head>
-<body>
-<div class="shell">
-  <aside class="sidebar" aria-label="Panel MyCluster">
-    <div class="brand">
-      <div class="brand-top"><img src="./logo.png" alt="MyCluster"><div><h1>MY <span>CLUSTER</span></h1><p>Tu espacio de movilidad y seguridad familiar</p></div></div>
-      <div class="mode">EXPLORACIÓN SIN REGISTRO · NO CONECTADA A CUENTAS</div>
-    </div>
-    <nav class="nav" aria-label="Secciones">
-      <button class="active" data-tab="mapa" onclick="showTab('mapa')" aria-label="Mapa"><svg viewBox="0 0 24 24"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15m6-12v15"/></svg>Mapa</button>
-      <button data-tab="circulos" onclick="showTab('circulos')" aria-label="Círculos"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19v-2a6 6 0 0 1 12 0v2m1-13a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4"/></svg>Círculos</button>
-      <button data-tab="rutas" onclick="showTab('rutas')" aria-label="Rutas"><svg viewBox="0 0 24 24"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a5 5 0 0 0 5-5V8"/></svg>Rutas</button>
-      <button data-tab="lugares" onclick="showTab('lugares')" aria-label="Lugares"><svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>Lugares</button>
-      <button data-tab="alertas" onclick="showTab('alertas')" aria-label="Alertas"><svg viewBox="0 0 24 24"><path d="m12 2 10 18H2L12 2Z"/><path d="M12 9v4m0 3h.01"/></svg>Alertas</button>
-    </nav>
-    <div class="content">
-      <section data-section="mapa">
-        <div class="kicker">Mapa interactivo</div><h2>Explora la experiencia</h2>
-        <p class="intro">Mapa real de OpenStreetMap. No se muestran familiares ni ubicaciones ficticias.</p>
-        <div class="panel soft"><div class="status"><span class="dot"></span><strong>Mapa público · sin cuenta</strong></div>
-          <p style="margin-top:10px">Puedes desplazarte por el mapa y consultar tu propia posición si lo autorizas. No se envía a MyCluster desde esta vista.</p></div>
-        <button class="button primary" onclick="locateMe()">◎ &nbsp; Mostrar mi ubicación</button>
-        <div class="panel" style="margin-top:13px"><h3>Acceso a MyCluster real</h3><p>Para sincronizar miembros, círculos, invitaciones y alertas necesitarás iniciar sesión y contar con un círculo.</p></div>
-      </section>
-      <section data-section="circulos" class="is-hidden">
-        <div class="kicker">Grupos privados</div><h2>Tus círculos</h2>
-        <p class="intro">La información familiar no aparece en esta vista pública.</p>
-        <div class="panel"><span class="tag">Sin datos personales</span><h3>Localización compartida con consentimiento</h3><p>El acceso a los miembros depende de autenticación y de la pertenencia a un círculo autorizado.</p></div>
-        <button class="button secondary" onclick="openApp()">Entrar en mi cuenta</button>
-      </section>
-      <section data-section="rutas" class="is-hidden">
-        <div class="kicker">Planificador básico</div><h2>Marca tu ruta</h2>
-        <p class="intro">Selecciona dos puntos en el mapa. Podrás abrir la navegación en Google Maps.</p>
-        <div class="steps"><span id="s1">1 · Seleccionar origen</span><span id="s2">2 · Seleccionar destino</span></div>
-        <button class="button primary" onclick="routeStart()">Seleccionar puntos en el mapa</button>
-        <button class="button secondary" id="routeGo" onclick="routeOpen()" disabled>Abrir ruta en Google Maps</button>
-        <button class="button secondary" onclick="routeReset()">Borrar selección</button>
-        <div class="panel"><p>Esta herramienta abre la ruta en Maps. No representa un convoy sincronizado, tráfico ni navegación propia de MyCluster.</p></div>
-      </section>
-      <section data-section="lugares" class="is-hidden">
-        <div class="kicker">Marcadores locales</div><h2>Mis lugares</h2>
-        <p class="intro">Guarda puntos temporalmente en esta sesión para probar el mapa.</p>
-        <button class="button primary" onclick="placeStart()">+ Elegir ubicación en el mapa</button>
-        <div class="panel" id="placesCard"><p>Todavía no hay lugares marcados.</p></div>
-        <p class="tiny muted">Estos marcadores no se guardan en una cuenta ni se comparten.</p>
-      </section>
-      <section data-section="alertas" class="is-hidden">
-        <div class="kicker">Seguridad familiar</div><h2>Alertas y SOS</h2>
-        <p class="intro">Las alertas reales permanecen desactivadas en el modo público.</p>
-        <div class="panel"><div class="status"><span class="dot gray"></span><strong>No conectado a círculo</strong></div><p style="margin-top:10px">Para enviar o recibir alertas familiares se requiere una sesión autenticada y servicios operativos. Esta vista no genera ni envía avisos.</p></div>
-        <button class="button secondary" onclick="openApp()">Acceder a la aplicación privada</button>
-        <div class="panel soft" style="margin-top:13px"><p>En una emergencia llama al 112. No dependas de esta vista de exploración para solicitar asistencia.</p></div>
-      </section>
-    </div>
-    <div class="sidebar-bottom">
-      <a class="button primary" href="./app.html#/entrar">Acceder a la aplicación con cuenta →</a>
-      <p>Interfaz pública de exploración. La aplicación de cuenta y sus servicios se mantienen separados.</p>
-    </div>
-  </aside>
-  <main class="map-area">
-    <div id="map"></div>
-    <div id="fallback" class="mapfallback is-hidden"><div><strong>Mapa no disponible</strong><p>Comprueba la conexión o el bloqueo de recursos externos. Puedes seguir explorando las secciones.</p></div></div>
-    <div class="heading float"><strong>MyCluster · Mapa</strong><div id="mapStatus">Vista inicial: Barcelona · no es tu ubicación</div></div>
-    <div class="tools float">
-      <button class="tool" onclick="locateMe()" title="Localizarme" aria-label="Localizarme">◎</button>
-      <button class="tool" onclick="resetView()" title="Vista inicial" aria-label="Vista inicial">⌖</button>
-    </div>
-    <div class="bottom-note float"><b>Sin registro.</b> Esta vista no utiliza ni expone datos de personas reales. Ubicación opcional, solo en este navegador.</div>
-  </main>
-</div>
-<div id="alert" role="status" aria-live="polite"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script>
-  const CENTER=[41.3874,2.1686], state={tab:'mapa',mode:null,origin:null,destination:null,places:[],markers:[],me:null};
-  let map=null, placeSeq=0, alertTimer=null;
-  function msg(s){const el=document.getElementById('alert');el.textContent=s;el.style.display='block';clearTimeout(alertTimer);alertTimer=setTimeout(()=>el.style.display='none',4400)}
-  function openApp(){location.href='./app.html#/entrar'}
-  function showTab(t){
-    state.tab=t;
-    document.querySelectorAll('[data-tab]').forEach(el=>{el.classList.toggle('active',el.dataset.tab===t);el.setAttribute('aria-current',el.dataset.tab===t?'page':'false')});
-    document.querySelectorAll('[data-section]').forEach(el=>el.classList.toggle('is-hidden',el.dataset.section!==t));
-    state.mode=null;
-    const titles={mapa:'Mapa',circulos:'Círculos',rutas:'Rutas',lugares:'Lugares',alertas:'Alertas'};
-    document.querySelector('.heading strong').textContent='MyCluster · '+titles[t];
-    if(map)setTimeout(()=>map.invalidateSize(),180);
-  }
-  function resetView(){if(map)map.setView(CENTER,13);document.getElementById('mapStatus').textContent='Vista inicial: Barcelona · no es tu ubicación'}
-  function locateMe(){
-    if(!navigator.geolocation){msg('Este navegador no admite geolocalización');return}
-    msg('Solicitando permiso de ubicación…');
-    navigator.geolocation.getCurrentPosition(pos=>{
-      if(!map)return;
-      const pt=[pos.coords.latitude,pos.coords.longitude];
-      if(state.me)map.removeLayer(state.me);
-      state.me=L.circleMarker(pt,{radius:9,color:'#fff',weight:3,fillColor:'#0c9ec2',fillOpacity:1}).addTo(map).bindPopup('Tu posición aproximada en este dispositivo');
-      L.circle(pt,{radius:Math.max(pos.coords.accuracy||0,15),color:'#0c9ec2',fillColor:'#0c9ec2',fillOpacity:.08,weight:1}).addTo(map);
-      map.setView(pt,Math.max(map.getZoom(),15));document.getElementById('mapStatus').textContent='Tu posición aproximada · ±'+Math.round(pos.coords.accuracy||0)+' m';
-      msg('Ubicación mostrada solo en este navegador');
-    },e=>msg(e.code===1?'Ubicación denegada. Puedes navegar sin ella.':'No fue posible determinar tu ubicación.'),{enableHighAccuracy:true,timeout:12000,maximumAge:0});
-  }
-  function mark(point,label,color){
-    if(!map)return null;
-    return L.circleMarker(point,{radius:8,color:'#fff',weight:2,fillColor:color||'#079ab9',fillOpacity:1}).addTo(map).bindPopup(label)
-  }
-  function routeStart(){state.origin=null;state.destination=null;state.mode='route';clearMarkers();document.getElementById('routeGo').disabled=true;updateSteps();msg('Toca el mapa para fijar el origen')}
-  function routeReset(){state.origin=null;state.destination=null;state.mode=null;clearMarkers();document.getElementById('routeGo').disabled=true;updateSteps();msg('Ruta borrada')}
-  function clearMarkers(){state.markers.forEach(m=>{if(m&&map)map.removeLayer(m)});state.markers=[]}
-  function updateSteps(){
-    document.getElementById('s1').textContent=state.origin?'✓ Origen seleccionado':'1 · Seleccionar origen';
-    document.getElementById('s2').textContent=state.destination?'✓ Destino seleccionado':'2 · Seleccionar destino';
-  }
-  function routeOpen(){
-    if(!state.origin||!state.destination)return;
-    const a=state.origin,b=state.destination;
-    window.open('https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(a.lat+','+a.lng)+'&destination='+encodeURIComponent(b.lat+','+b.lng)+'&travelmode=driving','_blank','noopener,noreferrer');
-  }
-  function placeStart(){state.mode='place';msg('Toca el mapa para elegir un lugar')}
-  function renderPlaces(){
-    const box=document.getElementById('placesCard');box.replaceChildren();
-    if(!state.places.length){const p=document.createElement('p');p.textContent='Todavía no hay lugares marcados.';box.append(p);return}
-    state.places.forEach(pl=>{
-      const row=document.createElement('div');row.className='place';
-      const a=document.createElement('div'),name=document.createElement('div'),coord=document.createElement('small');
-      name.className='place-name';name.textContent=pl.name;coord.textContent=pl.point.lat.toFixed(5)+', '+pl.point.lng.toFixed(5);
-      a.append(name,coord);
-      const btn=document.createElement('button');btn.textContent='Ver';btn.onclick=()=>{showTab('lugares');map.setView([pl.point.lat,pl.point.lng],16);pl.marker.openPopup()};
-      row.append(a,btn);box.append(row);
-    });
-  }
-  function onMapClick(e){
-    if(state.mode==='route'){
-      if(!state.origin){state.origin=e.latlng;state.markers.push(mark([e.latlng.lat,e.latlng.lng],'Origen','#1eaf95'));msg('Ahora toca el mapa para fijar el destino')}
-      else if(!state.destination){state.destination=e.latlng;state.markers.push(mark([e.latlng.lat,e.latlng.lng],'Destino','#ed9559'));state.mode=null;document.getElementById('routeGo').disabled=false;msg('Ruta lista para abrir en Google Maps')}
-      updateSteps();
-    }else if(state.mode==='place'){
-      const name=prompt('Nombre del lugar','Lugar '+(++placeSeq));if(!name||!name.trim()){state.mode=null;return}
-      const point=e.latlng;
-      const marker=mark([point.lat,point.lng],name.trim(),'#906de2');
-      state.places.push({name:name.trim(),point,marker});state.mode=null;renderPlaces();msg('Lugar añadido solo a esta sesión');
-    }
-  }
-  function init(){
-    if(typeof L==='undefined'){document.getElementById('fallback').classList.remove('is-hidden');return}
-    map=L.map('map',{zoomControl:false}).setView(CENTER,13);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
-    L.control.zoom({position:'bottomright'}).addTo(map);
-    map.on('click',onMapClick);
-    // Recalculate after CSS and grid layout have stabilized.
-    requestAnimationFrame(()=>requestAnimationFrame(()=>map.invalidateSize({pan:false})));
-  }
-  window.addEventListener('resize',()=>{if(map)map.invalidateSize({pan:false})});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-</script>
-</body>
-</html>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>MY CLUSTER | Family Command</title><link rel="icon" href="./logo.png"><link rel="stylesheet" href="./leaflet.css"><style>
+:root{--ink:#102a39;--navy:#091e2b;--blue:#0798ba;--line:#d9e6eb}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font:13px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:#e5eff0}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:default}.shell{height:100dvh;display:grid;grid-template-columns:350px minmax(0,1fr)}.side{z-index:1000;display:flex;flex-direction:column;min-height:0;background:#f9fcfd;border-right:1px solid #d1dfe4;box-shadow:5px 0 25px #072c3d20}.head{padding:19px;background:linear-gradient(145deg,#091e2b,#12415a);color:#fff}.brand{display:flex;align-items:center;gap:10px}.brand img{width:42px;height:42px;border-radius:11px;background:#fff}.brand h1{font-size:18px;letter-spacing:.09em;line-height:1;margin:0}.brand h1 span{color:#37d0ec}.eyebrow{font-size:9px;letter-spacing:.16em;color:#8edbea;font-weight:800;text-transform:uppercase;margin-top:6px}.grouphead{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:20px}.grouphead strong{font-size:17px}.chip{font-size:10px;border:1px solid #ffffff50;border-radius:20px;padding:4px 8px;color:#dbf8ff}.nav{display:flex;gap:5px;padding:9px;border-bottom:1px solid var(--line);background:white}.nav button{flex:1;border:0;background:transparent;padding:10px 4px;border-radius:9px;color:#6a8190;font-size:11px;font-weight:700}.nav button.active{background:#e2f6fa;color:#007d9c}.pane{overflow-y:auto;padding:17px;flex:1}.view[hidden]{display:none}.kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#008eae;font-weight:800;margin:0 0 7px}h2{font-size:23px;letter-spacing:-.03em;line-height:1.2;margin:0 0 8px}.subtitle{color:#6b8190;font-size:12px;margin:0 0 18px}.box{background:white;border:1px solid #e0e9ed;border-radius:14px;padding:14px;margin:12px 0}.box p{color:#667d89;font-size:11px;margin:7px 0 0}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.metric{background:#e9f6f9;border:1px solid #d7eaf0;border-radius:12px;padding:9px 6px;text-align:center}.metric b{display:block;font-size:23px;line-height:1.25}.metric small{font-size:10px;color:#587483}.btn{padding:11px 12px;border:1px solid #d8e5e9;border-radius:10px;background:#fff;color:#20455a;font-weight:730}.btn.main{background:#0799b9;border-color:#0799b9;color:white}.btn.fill{width:100%}.input{width:100%;border:1px solid #d6e4e9;padding:11px 12px;background:white;color:#163747;border-radius:10px;outline-color:#16a5c0;margin:7px 0 9px}.field{display:block;font-size:11px;font-weight:700;margin-top:10px}.rowitem{display:flex;align-items:center;gap:9px;border-bottom:1px solid #edf2f4;padding:10px 0}.rowitem:last-child{border:0}.circle{width:11px;height:11px;border-radius:50%;background:#079fc0;flex:none}.rowitem span{flex:1}.rowitem small{display:block;color:#718896}.note{font-size:11px;color:#718894;line-height:1.6}.status{padding:11px 14px;border-top:1px solid #d7e6eb;background:#eef8f9;color:#3a6272;min-height:47px;display:flex;align-items:center;gap:8px}.status .dot{height:8px;width:8px;border-radius:50%;background:#11a17e;flex:none}.maparea{position:relative;min-width:0;min-height:0;overflow:hidden}.map{position:absolute;inset:0;z-index:0}.float{position:absolute;z-index:600;background:#fff;border:1px solid #dce8eb;box-shadow:0 7px 30px #163b512a;border-radius:13px;padding:11px 15px}.search{top:17px;left:17px;width:min(400px,calc(100% - 175px));display:flex;gap:7px;padding:6px}.search input{min-width:0;flex:1;padding:9px 8px;border:0;outline:0}.search button{border:0;background:#0b94b2;color:#fff;border-radius:8px;padding:0 12px}.tools{right:16px;top:17px;display:flex;gap:7px}.tools button{border:1px solid #dce7ec;background:#fff;border-radius:10px;padding:10px;box-shadow:0 3px 13px #20394916}.mapcaption{bottom:21px;left:17px;max-width:390px;background:#0a2b3fe9;color:#ecfdff;border:0;font-size:11px}.mapcaption b{color:#83e1f4}.banner{padding:11px;border-radius:10px;margin:9px 0;font-size:11px;background:#eff8fa;color:#497282}.banner.warn{background:#fff4df;color:#815c15}.modalbg{position:fixed;z-index:5000;inset:0;background:#081d2dd0;display:grid;place-items:center;padding:14px;backdrop-filter:blur(5px)}.modal{width:min(440px,100%);border-radius:18px;background:#fff;padding:25px;box-shadow:0 25px 80px #06192999}.modal h2{font-size:24px}.modal p{font-size:12px;color:#597381;line-height:1.6}.modal .brand{margin-bottom:23px}.modal .brand h1{color:#112e3d}.hide{display:none!important}.link{word-break:break-all;padding:12px;background:#f0f6f9;border-radius:9px;font-size:11px;margin:12px 0}.muted{color:#738a97}.switch{display:flex;align-items:center;gap:9px;font-size:12px}.switch input{accent-color:#0896b2;width:16px;height:16px}.toast{position:absolute;top:85px;left:50%;transform:translateX(-50%);z-index:2200;background:#0d3649;color:white;padding:11px 16px;border-radius:12px;box-shadow:0 8px 25px #0003;max-width:90%;font-size:12px}.footer{display:flex;gap:7px;margin-top:10px}.footer button{flex:1}.leaflet-container{font:inherit}.leaflet-control-attribution{font-size:10px!important}
+@media(max-width:830px){.shell{display:flex;flex-direction:column}.maparea{order:1;flex:1}.side{order:2;height:48dvh;min-height:240px;box-shadow:0 -5px 20px #153b5025}.head{padding:10px 15px}.brand img{width:30px;height:30px}.brand h1{font-size:14px}.eyebrow{margin:3px 0 0}.grouphead{margin-top:4px}.grouphead strong{font-size:12px}.chip{font-size:9px}.nav{padding:5px}.nav button{padding:6px 2px}.pane{padding:11px 14px}.search{top:10px;left:10px;width:calc(100% - 148px)}.tools{top:10px;right:10px}.mapcaption{bottom:12px;left:10px;font-size:10px}}
+</style></head><body>
+<div class="shell"><aside class="side"><header class="head"><div class="brand"><img src="./logo.png"><div><h1>MY <span>CLUSTER</span></h1><div class="eyebrow">Family Command Center</div></div></div><div class="grouphead"><strong id="circleTitle">Mi espacio privado</strong><span class="chip" id="circleBadge">Sin registro</span></div></header>
+<nav class="nav"><button class="active" data-tab="home">Centro</button><button data-tab="members">Círculo</button><button data-tab="convoy">Convoy</button><button data-tab="places">Lugares</button></nav>
+<div class="pane">
+<section class="view" data-view="home"><div class="kicker">Situación del grupo</div><h2>Centro de control</h2><p class="subtitle">Personas, desplazamientos y coordinación en un único lugar.</p><div class="metrics"><div class="metric"><b id="numMembers">—</b><small>Miembros</small></div><div class="metric"><b id="numOnline">—</b><small>Visibles</small></div><div class="metric"><b id="numConvoy">—</b><small>Convoy</small></div></div>
+<div class="box"><strong>Tu ubicación</strong><p>Desactivada por defecto. Solo comparte tu posición mientras lo permitas.</p><div class="footer"><button class="btn main" id="shareBtn">Compartir ubicación</button><button class="btn" id="stopBtn">Detener</button></div></div>
+<div class="box"><strong>Coordinación inmediata</strong><p>Invita a otra persona para comprobar posiciones desde dos teléfonos diferentes.</p><div class="footer"><button class="btn main" id="quickInvite">Invitar</button><button class="btn" id="quickConvoy">Crear convoy</button></div></div><div class="banner warn">Esta versión no dispone de asistencia de emergencias ni SOS operativo. Ante una emergencia llama al 112.</div></section>
+<section class="view" data-view="members" hidden><div class="kicker">Personas autorizadas</div><h2>Mi círculo</h2><p class="subtitle">Invitaciones con enlaces privados; no hace falta crear una cuenta.</p><button class="btn main fill" id="inviteBtn">+ Crear invitación</button><div class="box"><strong>Miembros del círculo</strong><div id="memberList"></div></div><p class="note">Solo los miembros que activan la ubicación aparecen sobre el mapa. Se oculta si dejan de actualizarla.</p></section>
+<section class="view" data-view="convoy" hidden><div class="kicker">Movilidad coordinada</div><h2>Convoy</h2><p class="subtitle">Comparte un destino con tu círculo y consulta los participantes visibles.</p><div id="convoyActive" class="box"></div><label class="field">Nombre del convoy</label><input class="input" id="convoyName" maxlength="80" placeholder="Ej. Viaje a Tarragona"><button class="btn main fill" id="chooseTarget">Elegir destino en el mapa</button><div class="banner" id="destinationText">Aún no has elegido destino.</div><div class="two"><button class="btn main" id="startConvoy">Iniciar convoy</button><button class="btn" id="stopConvoy">Finalizar</button></div><p class="note">El convoy sincroniza el destino y las ubicaciones compartidas. La navegación y los tiempos estimados se abren externamente en Google Maps; no se simula navegación propia.</p></section>
+<section class="view" data-view="places" hidden><div class="kicker">Herramientas útiles</div><h2>Explorar lugares</h2><p class="subtitle">Busca destinos y selecciónalos sobre el mapa.</p><button class="btn main fill" id="locateBtn">Centrar en mi ubicación</button><div class="box"><strong>Punto seleccionado</strong><p id="selectedPoint">Toca el mapa para elegir una ubicación.</p><div class="footer"><button class="btn" id="copyCoords">Copiar coordenadas</button><button class="btn" id="openNav">Cómo llegar</button></div></div><p class="note">Búsqueda pública de OpenStreetMap. No se transmite tu círculo ni sus miembros al buscador.</p></section>
+</div><div class="status"><span class="dot"></span><span id="status">Iniciando la aplicación…</span></div></aside>
+<main class="maparea"><div id="map" class="map"></div><form class="float search" id="searchForm"><input id="searchText" placeholder="Buscar ciudad, dirección o destino" aria-label="Buscar lugar"><button type="submit">Buscar</button></form><div class="tools"><button id="homeBtn" title="Ver Barcelona">⌖</button><button id="myPosBtn" title="Mi ubicación">◎</button></div><div class="float mapcaption"><b>MyCluster en directo</b> · Círculos e invitaciones reales · Ubicación voluntaria</div><div class="toast hide" id="toast"></div></main></div>
+<div class="modalbg hide" id="welcome"><div class="modal"><div class="brand"><img src="./logo.png"><div><h1>MY <span>CLUSTER</span></h1><div class="eyebrow">Entrar sin registrarte</div></div></div><h2>Empieza con tu círculo</h2><p>No hay correo ni contraseña. Crea un círculo privado o abre el enlace de invitación que te envíen.</p><div id="newForm"><label class="field">Tu nombre</label><input class="input" id="myName" value="Yo" maxlength="60"><label class="field">Nombre del círculo</label><input class="input" id="newCircle" value="Mi círculo" maxlength="80"><button class="btn main fill" id="createCircle">Crear círculo y abrir el mapa</button></div><div id="joinForm" class="hide"><label class="field">Cómo quieres aparecer</label><input class="input" id="joinName" maxlength="60" placeholder="Tu nombre"><button class="btn main fill" id="joinCircle">Aceptar invitación y entrar</button></div><p id="welcomeError" style="color:#b43131"></p></div></div>
+<div class="modalbg hide" id="inviteModal"><div class="modal"><h2>Invitar al círculo</h2><p>El enlace es la llave de acceso al grupo. Envíalo solo a quien quieras invitar.</p><label class="field">Vigencia de la invitación</label><select class="input" id="inviteHours"><option value="24">24 horas</option><option value="1">1 hora</option><option value="168">7 días</option></select><button class="btn main fill" id="generateInvite">Generar enlace privado</button><div class="link hide" id="inviteLink"></div><div class="footer"><button class="btn" id="copyInvite">Copiar enlace</button><button class="btn" id="shareInvite">Compartir</button></div><p class="note">Cada enlace admite un máximo de 12 incorporaciones y caduca automáticamente.</p><button class="btn fill" id="closeInvite">Cerrar</button></div></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script><script>
+(()=>{"use strict";
+const API="https://ndeiyekxonwlzhgonxzr.supabase.co/rest/v1/rpc/",KEY="sb_publishable_jCzhrmvVInvl64hTblGetQ_o-v7D2os",STORAGE="mycluster.guest.v1";
+const $=id=>document.getElementById(id), state={session:null,data:null,map:null,markers:null,target:null,selected:null,choosing:false,watch:null,lastPush:0,inviteUrl:"",position:null,timer:null};
+function say(s){$("status").textContent=s}
+function toast(s){const e=$("toast");e.textContent=s;e.classList.remove("hide");setTimeout(()=>e.classList.add("hide"),4300)}
+function error(e){const msg=e?.message||String(e);say("Error: "+msg);toast(msg)}
+async function rpc(fn,body){const res=await fetch(API+fn,{method:"POST",headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+KEY},body:JSON.stringify(body||{})});const txt=await res.text();let value;try{value=JSON.parse(txt)}catch{value=txt}if(!res.ok)throw new Error(value?.message||"No se pudo completar la operación");return value}
+function saved(){try{return JSON.parse(localStorage.getItem(STORAGE)||"null")}catch{return null}}
+function setSession(s){state.session=s;localStorage.setItem(STORAGE,JSON.stringify(s));history.replaceState(null,"",location.pathname);$("welcome").classList.add("hide");}
+function tab(name){document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));document.querySelectorAll("[data-view]").forEach(el=>el.hidden=el.dataset.view!==name);state.map?.invalidateSize();if(name==="convoy")setTimeout(()=>state.map?.invalidateSize(),120)}
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+function initMap(){if(!window.L){say("No se pudo cargar el motor del mapa");return}const L=window.L;state.map=L.map("map",{zoomControl:false}).setView([41.3874,2.1686],12);L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(state.map);L.control.zoom({position:"bottomright"}).addTo(state.map);state.markers=L.layerGroup().addTo(state.map);state.map.on("click",e=>{state.selected=e.latlng;if(state.choosing){state.target=e.latlng;state.choosing=false;$("destinationText").textContent="Destino: "+e.latlng.lat.toFixed(5)+", "+e.latlng.lng.toFixed(5);toast("Destino seleccionado")}else toast("Punto seleccionado");draw()});window.addEventListener("resize",()=>state.map.invalidateSize());setTimeout(()=>state.map.invalidateSize(),200)}
+function draw(){const L=window.L;if(!L||!state.map)return;state.markers.clearLayers();const data=state.data;if(data){for(const m of(data.members||[])){if(m.lat==null||m.lng==null)continue;const dot=L.circleMarker([m.lat,m.lng],{radius:10,weight:3,color:"white",fillColor:m.id===data.me.id?"#009fbf":"#775bd1",fillOpacity:1}).addTo(state.markers);const popup=document.createElement("div");popup.textContent=m.name+" · ubicación compartida";dot.bindPopup(popup)}if(data.convoy){const p=L.marker([data.convoy.destination_lat,data.convoy.destination_lng]).addTo(state.markers);const popup=document.createElement("div");popup.textContent="Convoy: "+data.convoy.title;p.bindPopup(popup)}}if(state.target)L.circleMarker([state.target.lat,state.target.lng],{radius:9,color:"#fff",weight:2,fillColor:"#f58d31",fillOpacity:1}).addTo(state.markers).bindPopup("Destino elegido");else if(state.selected)L.circleMarker([state.selected.lat,state.selected.lng],{radius:7,color:"#fff",weight:2,fillColor:"#18a4c9",fillOpacity:1}).addTo(state.markers)}
+function update(){const d=state.data;if(!d)return;$("circleTitle").textContent=d.circle.name;$("circleBadge").textContent=(d.members||[]).length+" miembros";$("numMembers").textContent=d.members.length;$("numOnline").textContent=d.members.filter(m=>m.lat!==null).length;$("numConvoy").textContent=d.convoy?"1":"0";$("memberList").replaceChildren();d.members.forEach(m=>{const row=document.createElement("div");row.className="rowitem";const dot=document.createElement("i");dot.className="circle";dot.style.background=m.lat==null?"#aebdc4":"#10a2be";const cell=document.createElement("span");const title=document.createElement("strong");title.textContent=m.name+(m.id===d.me.id?" (tú)":"");const sub=document.createElement("small");sub.textContent=m.lat!==null?"Compartiendo posición":"Sin posición";cell.append(title,sub);row.append(dot,cell);$("memberList").append(row)});const v=$("convoyActive");v.replaceChildren();if(d.convoy){const strong=document.createElement("strong");strong.textContent="Convoy activo: "+d.convoy.title;const p=document.createElement("p");p.textContent="Destino compartido · "+d.convoy.destination_lat.toFixed(4)+", "+d.convoy.destination_lng.toFixed(4);const btn=document.createElement("button");btn.className="btn";btn.textContent="Ver destino";btn.onclick=()=>{tab("convoy");state.map.setView([d.convoy.destination_lat,d.convoy.destination_lng],14)};v.append(strong,p,btn)}else v.innerHTML="<strong>Sin convoy activo</strong><p>Crea un convoy, selecciona el destino e invita a los participantes.</p>";$("shareBtn").textContent=d.me.sharing?"Ubicación activa":"Compartir ubicación";say("Conectado · última sincronización "+new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}));draw()}
+async function refresh(){if(!state.session)return;try{state.data=await rpc("mc_guest_state",{p_circle:state.session.circle_id,p_token:state.session.access_token});update()}catch(e){error(e)}}
+async function create(){try{$("welcomeError").textContent="Creando círculo…";const d=await rpc("mc_guest_create",{p_name:$("newCircle").value.trim(),p_member_name:$("myName").value.trim()});setSession(d);await refresh()}catch(e){$("welcomeError").textContent=e.message}}
+async function join(){try{$("welcomeError").textContent="Uniéndote al círculo…";const d=await rpc("mc_guest_join",{p_invite:location.hash.replace("#/unirse/",""),p_name:$("joinName").value.trim()});setSession(d);await refresh()}catch(e){$("welcomeError").textContent=e.message}}
+async function invite(){if(!state.session)return;try{const hours=Number($("inviteHours").value);const r=await rpc("mc_guest_invite",{p_circle:state.session.circle_id,p_token:state.session.access_token,p_hours:hours});const url=new URL(location.pathname,location.origin);url.hash="/unirse/"+r.token;state.inviteUrl=url.toString();$("inviteLink").textContent=state.inviteUrl;$("inviteLink").classList.remove("hide");toast("Enlace listo para compartir")}catch(e){error(e)}}
+function showInvite(){$("inviteModal").classList.remove("hide");$("inviteLink").classList.add("hide");state.inviteUrl=""}
+async function shareLoc(on){if(!state.session)return;if(!on){if(state.watch!==null)navigator.geolocation.clearWatch(state.watch);state.watch=null;state.position=null;await rpc("mc_guest_location",{p_circle:state.session.circle_id,p_token:state.session.access_token,p_share:false});await refresh();toast("Has dejado de compartir tu ubicación");return}if(!navigator.geolocation){toast("Geolocalización no disponible");return}if(state.watch!==null)return;const push=async p=>{const now=Date.now();if(now-state.lastPush<12000)return;state.lastPush=now;state.position=p.coords;try{await rpc("mc_guest_location",{p_circle:state.session.circle_id,p_token:state.session.access_token,p_lat:p.coords.latitude,p_lng:p.coords.longitude,p_accuracy:p.coords.accuracy,p_share:true});await refresh();state.map.setView([p.coords.latitude,p.coords.longitude],15)}catch(e){error(e)}};state.watch=navigator.geolocation.watchPosition(push,e=>{toast(e.code===1?"Permiso de ubicación denegado":"No se pudo obtener la ubicación");if(state.watch!==null)navigator.geolocation.clearWatch(state.watch);state.watch=null},{enableHighAccuracy:true,maximumAge:8000,timeout:15000})}
+async function startConvoy(){if(!state.target){toast("Primero selecciona un destino en el mapa");return}try{await rpc("mc_guest_convoy_start",{p_circle:state.session.circle_id,p_token:state.session.access_token,p_title:$("convoyName").value.trim()||"Convoy familiar",p_lat:state.target.lat,p_lng:state.target.lng});await refresh();toast("Convoy iniciado y disponible para tu círculo")}catch(e){error(e)}}
+async function endConvoy(){try{await rpc("mc_guest_convoy_stop",{p_circle:state.session.circle_id,p_token:state.session.access_token});await refresh();toast("Convoy finalizado")}catch(e){error(e)}}
+async function searchPlace(e){e.preventDefault();const q=$("searchText").value.trim();if(q.length<3)return;try{say("Buscando dirección…");const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q),{headers:{"Accept":"application/json"}});if(!r.ok)throw Error("No se pudo buscar");const a=await r.json();if(!a.length){toast("Sin resultados");return}const pt={lat:Number(a[0].lat),lng:Number(a[0].lon)};state.selected=pt;state.map.setView([pt.lat,pt.lng],15);draw();toast(a[0].display_name.slice(0,90));say("Destino encontrado")}catch(e){error(e)}}
+function centerMe(){if(!navigator.geolocation)return toast("Sin acceso a ubicación");navigator.geolocation.getCurrentPosition(p=>state.map.setView([p.coords.latitude,p.coords.longitude],15),()=>toast("Autoriza ubicación en el navegador"),{timeout:10000})}
+function navTo(){const p=state.target||state.selected;if(!p)return toast("Selecciona primero un destino");window.open("https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(p.lat+","+p.lng)," _blank".trim(),"noopener,noreferrer")}
+$("createCircle").onclick=create;$("joinCircle").onclick=join;$("inviteBtn").onclick=showInvite;$("quickInvite").onclick=showInvite;$("quickConvoy").onclick=()=>tab("convoy");$("generateInvite").onclick=invite;$("closeInvite").onclick=()=>$("inviteModal").classList.add("hide");$("copyInvite").onclick=async()=>{if(!state.inviteUrl)return;await navigator.clipboard.writeText(state.inviteUrl);toast("Enlace copiado")};$("shareInvite").onclick=async()=>{if(!state.inviteUrl)return;if(navigator.share)await navigator.share({title:"MyCluster",url:state.inviteUrl});else{await navigator.clipboard.writeText(state.inviteUrl);toast("Enlace copiado")}};$("shareBtn").onclick=()=>shareLoc(true);$("stopBtn").onclick=()=>shareLoc(false);$("locateBtn").onclick=centerMe;$("myPosBtn").onclick=centerMe;$("homeBtn").onclick=()=>state.map.setView([41.3874,2.1686],12);$("chooseTarget").onclick=()=>{tab("convoy");state.choosing=true;toast("Toca el mapa para marcar el destino")};$("startConvoy").onclick=startConvoy;$("stopConvoy").onclick=endConvoy;$("searchForm").onsubmit=searchPlace;$("copyCoords").onclick=()=>{const p=state.selected||state.target;if(!p)return toast("Selecciona un lugar");navigator.clipboard.writeText(p.lat.toFixed(6)+","+p.lng.toFixed(6));toast("Coordenadas copiadas")};$("openNav").onclick=navTo;
+initMap();const inv=location.hash.startsWith("#/unirse/");const old=saved();if(inv){$("welcome").classList.remove("hide");$("newForm").classList.add("hide");$("joinForm").classList.remove("hide")}else if(old&&old.circle_id&&old.access_token){state.session=old;refresh()}else $("welcome").classList.remove("hide");state.timer=setInterval(refresh,8000);
+window.addEventListener("beforeunload",()=>{if(state.watch!==null)navigator.geolocation.clearWatch(state.watch)});
+})();
+</script></body></html>

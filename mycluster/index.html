@@ -22,7 +22,7 @@ const $=id=>document.getElementById(id), state={session:null,data:null,map:null,
 function say(s){$("status").textContent=s}
 function toast(s){const e=$("toast");e.textContent=s;e.classList.remove("hide");setTimeout(()=>e.classList.add("hide"),4300)}
 function error(e){const msg=e?.message||String(e);say("Error: "+msg);toast(msg)}
-async function rpc(fn,body){const res=await fetch(API+fn,{method:"POST",headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+KEY},body:JSON.stringify(body||{})});const txt=await res.text();let value;try{value=JSON.parse(txt)}catch{value=txt}if(!res.ok)throw new Error(value?.message||"No se pudo completar la operación");return value}
+async function rpc(fn,body){const res=await fetch(API+fn,{method:"POST",headers:{"Content-Type":"application/json","apikey":KEY},body:JSON.stringify(body||{})});const txt=await res.text();let value;try{value=JSON.parse(txt)}catch{value=txt}if(!res.ok)throw new Error(value?.message||"No se pudo completar la operación");return value}
 function saved(){try{return JSON.parse(localStorage.getItem(STORAGE)||"null")}catch{return null}}
 function setSession(s){state.session=s;localStorage.setItem(STORAGE,JSON.stringify(s));history.replaceState(null,"",location.pathname);$("welcome").classList.add("hide");}
 function tab(name){document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));document.querySelectorAll("[data-view]").forEach(el=>el.hidden=el.dataset.view!==name);state.map?.invalidateSize();if(name==="convoy")setTimeout(()=>state.map?.invalidateSize(),120)}
